@@ -1,0 +1,18 @@
+############################################################
+# Configuration file for Bochs v2.3.5
+############################################################
+
+megs: 32
+
+romimage: file=/usr/local/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/local/share/bochs/VGABIOS-lgpl-latest
+
+floppya: 1_44=fd.img, status=inserted
+
+boot: floppy
+
+log: bochsout.log
+
+mouse: enabled=0
+
+keyboard_mapping: enabled=0, map=/usr/share/bochs/keymaps/x11-pc-us.map
