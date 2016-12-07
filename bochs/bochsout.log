@@ -32,15 +32,16 @@
 00000000000i[     ]   SB16 support: no
 00000000000i[     ]   USB support: no
 00000000000i[     ]   VGA extension support: vbe 
-00000000000i[MEM0 ] allocated memory at 0x7fa83e98a010. after alignment, vector=0x7fa83e98b000
+00000000000i[MEM0 ] allocated memory at 0x7fa502532010. after alignment, vector=0x7fa502533000
 00000000000i[MEM0 ] 32.00MB
 00000000000i[MEM0 ] rom at 0xfffe0000/131072 ('/usr/local/share/bochs/BIOS-bochs-latest')
 00000000000i[MEM0 ] rom at 0xc0000/38400 ('/usr/local/share/bochs/VGABIOS-lgpl-latest')
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Fri Dec  2 09:22:23 2016 (time0=1480641743)
+00000000000i[CMOS ] Setting initial clock to: Fri Dec  2 16:44:52 2016 (time0=1480668292)
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[DMA  ] channel 2 used by Floppy Drive
-00000000000i[FDD  ] fd0: 'fd.img' ro=0, h=2,t=80,spt=18
+00000000000i[FDD  ] fd0: 'freedos.img' ro=0, h=2,t=80,spt=18
+00000000000i[FDD  ] fd1: 'fd.img' ro=0, h=2,t=80,spt=18
 00000000000i[MEM0 ] Register memory access handlers: 000a0000-000bffff
 00000000000i[XGUI ] test_alloc_colors: 16 colors available out of 16 colors tried
 00000000000i[XGUI ] font 8 wide x 16 high, display depth = 24
@@ -85,20 +86,57 @@
 00000080000e[VGA  ] character height = 1, skipping text update
 00000160000e[VGA  ] character height = 1, skipping text update
 00000240000e[VGA  ] character height = 1, skipping text update
-00000318053i[KBD  ] reset-disable command received
+00000318068i[KBD  ] reset-disable command received
 00000320000e[VGA  ] character height = 1, skipping text update
-00000352733i[BIOS ] Starting rombios32
-00000353556i[BIOS ] ram_size=0x02000000
-00000354165i[BIOS ] Found 1 cpu(s)
+00000352748i[BIOS ] Starting rombios32
+00000353571i[BIOS ] ram_size=0x02000000
+00000354180i[BIOS ] Found 1 cpu(s)
 00000400000e[VGA  ] character height = 1, skipping text update
 00000480000e[VGA  ] character height = 1, skipping text update
 00000560000e[VGA  ] character height = 1, skipping text update
 00000640000e[VGA  ] character height = 1, skipping text update
-00000641438i[VBIOS] VGABios $Id: vgabios.c,v 1.66 2006/07/10 07:47:51 vruppert Exp $
-00000641509i[VGA  ] VBE known Display Interface b0c0
-00000641541i[VGA  ] VBE known Display Interface b0c4
-00000644466i[VBIOS] VBE Bios $Id: vbe.c,v 1.58 2006/08/19 09:39:43 vruppert Exp $
+00000641453i[VBIOS] VGABios $Id: vgabios.c,v 1.66 2006/07/10 07:47:51 vruppert Exp $
+00000641524i[VGA  ] VBE known Display Interface b0c0
+00000641556i[VGA  ] VBE known Display Interface b0c4
+00000644481i[VBIOS] VBE Bios $Id: vbe.c,v 1.58 2006/08/19 09:39:43 vruppert Exp $
 00000720000i[XGUI ] charmap update. Font Height is 16
 00000800000i[XGUI ] charmap update. Font Height is 16
-00001088711i[BIOS ] Booting from 0000:7C00
-00308920464i[     ] Ctrl-C detected in signal handler.
+00001088727i[BIOS ] Booting from 0000:7C00
+00005114527i[BIOS ] int13_harddisk: function 00, unmapped device for ELDL=80
+00005119781i[BIOS ] int13_harddisk: function 08, unmapped device for ELDL=80
+02854834963i[     ] Ctrl-C detected in signal handler.
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(51)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(d1)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(e0)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(9c)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(e0)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(1c)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(e0)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(9c)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(e0)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(1c)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(e0)
+02854836000i[KBD  ] internal keyboard buffer full, ignoring scancode.(9c)
+02909294792i[     ] Ctrl-C detected in signal handler.
+02909294793i[     ] dbg: Quit
+02909294793i[CPU  ] protected mode
+02909294793i[CPU  ] CS.d_b = 32 bit
+02909294793i[CPU  ] SS.d_b = 16 bit
+02909294793i[CPU  ] | EAX=00000c50  EBX=00000000  ECX=00000000  EDX=00000000
+02909294793i[CPU  ] | ESP=00000100  EBP=00000000  ESI=ffff0000  EDI=0000077e
+02909294793i[CPU  ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf zf af PF cf
+02909294793i[CPU  ] | SEG selector     base    limit G D
+02909294793i[CPU  ] | SEG sltr(index|ti|rpl)     base    limit G D
+02909294793i[CPU  ] |  CS:0008( 0001| 0|  0) 000323c0 00000014 0 1
+02909294793i[CPU  ] |  DS:3224( 0005| 0|  0) 00032240 0000ffff 0 0
+02909294793i[CPU  ] |  SS:3224( 0005| 0|  0) 00032240 0000ffff 0 0
+02909294793i[CPU  ] |  ES:3224( 0005| 0|  0) 00032240 0000ffff 0 0
+02909294793i[CPU  ] |  FS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+02909294793i[CPU  ] |  GS:0010( 0002| 0|  0) 000b8000 0000ffff 0 0
+02909294793i[CPU  ] | EIP=00000013 (00000013)
+02909294793i[CPU  ] | CR0=0x00000011 CR1=0 CR2=0x00000000
+02909294793i[CPU  ] | CR3=0x00000000 CR4=0x00000000
+02909294793i[CPU  ] >> jmp .+0xfffffffe (0x000323d3) : EBFE
+02909294793i[CMOS ] Last time is 1480669746 (Fri Dec  2 17:09:06 2016)
+02909294793i[XGUI ] Exit.
+02909294793i[CTRL ] quit_sim called with exit code 0
