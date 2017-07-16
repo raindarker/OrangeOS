@@ -7,7 +7,8 @@ megs: 32
 romimage: file=/usr/local/share/bochs/BIOS-bochs-latest
 vgaromimage: file=/usr/local/share/bochs/VGABIOS-lgpl-latest
 
-floppya: 1_44=OrangeOS.img, status=inserted
+floppya: 1_44=freedos.img, status=inserted
+floppyb: 1_44=pm.img, status=inserted
 
 boot: a
 
