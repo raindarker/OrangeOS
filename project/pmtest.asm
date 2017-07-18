@@ -313,19 +313,7 @@ LABEL_SEG_CODE32:
   push	TopOfStack3
   push	SelectorCodeRing3
   push	0
-  retf
-
-  ud2	; should never arrive here
-
-  ; 测试调用门（无特权级变换），将打印字母 'C'
-  call	SelectorCallGateTest:0
-  ;call	SelectorCodeDest:0
-
-  ; Load LDT
-  mov	ax, SelectorLDT
-  lldt	ax
-
-  jmp	SelectorLDTCodeA:0	; 跳入局部任务
+  retf		; Ring0 -> Ring3，历史性转移！将打印数字 '3'。
 
   ; ------------------------------------------------------------------------
 DispReturn:
@@ -361,7 +349,11 @@ LABEL_SEG_CODE_DEST:
   mov	al, 'C'
   mov	[gs:edi], ax
 
-  retf
+  ; Load LDT
+  mov	ax, SelectorLDT
+  lldt	ax
+
+  jmp	SelectorLDTCodeA:0	; 跳入局部任务，将打印字母 'L'。
 
   SegCodeDestLen	equ	$ - LABEL_SEG_CODE_DEST
   ; END of [SECTION .sdest]
