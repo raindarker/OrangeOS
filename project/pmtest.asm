@@ -102,10 +102,11 @@ _MemChkBuf:             times	256	db	0
 ALIGN	32
 [BITS	32]
 LABEL_IDT:
-  ; 门        目标选择子,             偏移, DCount, 属性
-%rep 255
+  ;                门         目标选择子,             偏移, DCount, 属性
+%rep 128
   Gate	SelectorCode32, SpuriousHandler,      0, DA_386IGate
 %endrep
+  .080h:		Gate	SelectorCode32,  UserIntHandler,      0, DA_386IGate
 
   IdtLen		equ	$ - LABEL_IDT
   IdtPtr		dw	IdtLen - 1	; 段界限
@@ -264,6 +265,7 @@ LABEL_SEG_CODE32:
 
   call	Init8259A
   int	080h
+  jmp $
 
   ; 下面显示一个字符串
   push	szPMMessage
@@ -357,6 +359,13 @@ io_delay:
   nop
   nop
   ret
+
+_UserIntHandler:
+  UserIntHandler	equ	_UserIntHandler - $$
+  mov	ah, 0Ch				; 0000: 黑底    1100: 红字
+  mov	al, 'I'
+  mov	[gs:((80 * 0 + 70) * 2)], ax	; 屏幕第 0 行, 第 70 列。
+  iretd
 
 _SpuriousHandler:
   SpuriousHandler	equ	_SpuriousHandler - $$
