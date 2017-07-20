@@ -102,8 +102,12 @@ _MemChkBuf:             times	256	db	0
 ALIGN	32
 [BITS	32]
 LABEL_IDT:
-  ;                门         目标选择子,             偏移, DCount, 属性
-%rep 128
+  ; 门         目标选择子,            偏移, DCount, 属性
+%rep 32
+  Gate	SelectorCode32, SpuriousHandler,      0, DA_386IGate
+%endrep
+  .020h:		Gate	SelectorCode32,    ClockHandler,      0, DA_386IGate
+%rep 95
   Gate	SelectorCode32, SpuriousHandler,      0, DA_386IGate
 %endrep
   .080h:		Gate	SelectorCode32,  UserIntHandler,      0, DA_386IGate
@@ -211,7 +215,7 @@ LABEL_MEM_CHK_OK:
   lgdt	[GdtPtr]
 
   ; 关中断
-  cli
+  ; cli
 
   ; 加载 IDTR
   lidt	[IdtPtr]
@@ -265,6 +269,7 @@ LABEL_SEG_CODE32:
 
   call	Init8259A
   int	080h
+  sti
   jmp $
 
   ; 下面显示一个字符串
@@ -359,6 +364,14 @@ io_delay:
   nop
   nop
   ret
+
+  ; int handler ---------------------------------------------------------------
+_ClockHandler:
+  ClockHandler	equ	_ClockHandler - $$
+  inc	byte [gs:((80 * 0 + 70) * 2)]	; 屏幕第 0 行, 第 70 列。
+  mov	al, 20h
+  out	20h, al				; 发送 EOI
+  iretd
 
 _UserIntHandler:
   UserIntHandler	equ	_UserIntHandler - $$
