@@ -97,6 +97,21 @@ _MemChkBuf:             times	256	db	0
   ; END of [SECTION .data1]
 
 
+  ; IDT
+[SECTION .idt]
+ALIGN	32
+[BITS	32]
+LABEL_IDT:
+  ; 门        目标选择子,             偏移, DCount, 属性
+%rep 255
+  Gate	SelectorCode32, SpuriousHandler,      0, DA_386IGate
+%endrep
+
+  IdtLen		equ	$ - LABEL_IDT
+  IdtPtr		dw	IdtLen - 1	; 段界限
+  dd	0		; 基地址
+  ; END of [SECTION .idt]
+
   ; 全局堆栈段
 [SECTION .gs]
 ALIGN	32
@@ -184,11 +199,21 @@ LABEL_MEM_CHK_OK:
   add	eax, LABEL_GDT            ; eax <- gdt 基地址
   mov	dword [GdtPtr + 2], eax   ; [GdtPtr + 2] <- gdt 基地址
 
+  ; 为加载 IDTR 作准备
+  xor	eax, eax
+  mov	ax, ds
+  shl	eax, 4
+  add	eax, LABEL_IDT		; eax <- idt 基地址
+  mov	dword [IdtPtr + 2], eax	; [IdtPtr + 2] <- idt 基地址
+
   ; 加载 GDTR
   lgdt	[GdtPtr]
 
   ; 关中断
   cli
+
+  ; 加载 IDTR
+  lidt	[IdtPtr]
 
   ; 打开地址线A20
   in	al, 92h
@@ -237,6 +262,9 @@ LABEL_SEG_CODE32:
   mov	ss, ax			; 堆栈段选择子
   mov	esp, TopOfStack
 
+  call	Init8259A
+  int	080h
+
   ; 下面显示一个字符串
   push	szPMMessage
   call	DispStr
@@ -252,6 +280,92 @@ LABEL_SEG_CODE32:
 
   ; 到此停止
   jmp	SelectorCode16:0
+
+
+  ; Init8259A ---------------------------------------------------------------------------------------------
+Init8259A:
+  mov	al, 011h
+  out	020h, al	; 主8259, ICW1.
+  call	io_delay
+
+  out	0A0h, al	; 从8259, ICW1.
+  call	io_delay
+
+  mov	al, 020h	; IRQ0 对应中断向量 0x20
+  out	021h, al	; 主8259, ICW2.
+  call	io_delay
+
+  mov	al, 028h	; IRQ8 对应中断向量 0x28
+  out	0A1h, al	; 从8259, ICW2.
+  call	io_delay
+
+  mov	al, 004h	; IR2 对应从8259
+  out	021h, al	; 主8259, ICW3.
+  call	io_delay
+
+  mov	al, 002h	; 对应主8259的 IR2
+  out	0A1h, al	; 从8259, ICW3.
+  call	io_delay
+
+  mov	al, 001h
+  out	021h, al	; 主8259, ICW4.
+  call	io_delay
+
+  out	0A1h, al	; 从8259, ICW4.
+  call	io_delay
+
+  mov	al, 11111110b	; 仅仅开启定时器中断
+  ;mov	al, 11111111b	; 屏蔽主8259所有中断
+  out	021h, al	; 主8259, OCW1.
+  call	io_delay
+
+  mov	al, 11111111b	; 屏蔽从8259所有中断
+  out	0A1h, al	; 从8259, OCW1.
+  call	io_delay
+
+  ret
+  ; Init8259A ---------------------------------------------------------------------------------------------
+
+
+;; ; SetRealmode8259A ---------------------------------------------------------------------------------------------
+;; SetRealmode8259A:
+;;  mov	ax, SelectorData
+;;  mov	fs, ax
+
+;;  mov	al, 017h
+;;  out	020h, al	; 主8259, ICW1.
+;;  call	io_delay
+
+;;  mov	al, 008h	; IRQ0 对应中断向量 0x8
+;;  out	021h, al	; 主8259, ICW2.
+;;  call	io_delay
+
+;;  mov	al, 001h
+;;  out	021h, al	; 主8259, ICW4.
+;;  call	io_delay
+
+;;  mov	al, [fs:SavedIMREG]	; ┓恢复中断屏蔽寄存器(IMREG)的原值
+;;  out	021h, al		; ┛
+;;  call	io_delay
+
+;;  ret
+  ; SetRealmode8259A ---------------------------------------------------------------------------------------------
+
+io_delay:
+  nop
+  nop
+  nop
+  nop
+  ret
+
+_SpuriousHandler:
+  SpuriousHandler	equ	_SpuriousHandler - $$
+  mov	ah, 0Ch				; 0000: 黑底    1100: 红字
+  mov	al, '!'
+  mov	[gs:((80 * 0 + 75) * 2)], ax	; 屏幕第 0 行, 第 75 列。
+  jmp	$
+  iretd
+
 
   ; 启动分页机制 --------------------------------------------------------------
 SetupPaging:
