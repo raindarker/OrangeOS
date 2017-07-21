@@ -1,17 +1,33 @@
-#default: boot.bin a.img
-	#@cp a.img OrangeOS.img
-	#@dd if=boot.bin of=OrangeOS.img bs=512 count=1 conv=notrunc
+##################################################
+# Makefile
+##################################################
 
-default:
-	@nasm pmtest.asm -o pmtest.com
-	@cp a.img pm.img
-	@sudo mount -o loop pm.img /mnt/floppy
-	@sudo cp pmtest.com /mnt/floppy
-	@sudo umount /mnt/floppy
+BOOT:=boot.asm
+LDR:=loader.asm
+BOOT_BIN:=$(subst .asm,.bin,$(BOOT))
+LDR_BIN:=$(subst .asm,.bin,$(LDR))
+
+IMG:=OrangeOS.img
+FLOPPY:=/mnt/floppy/
+
+.PHONY : default
+
+default : $(BOOT_BIN) $(LDR_BIN)
+	@cp a.img $(IMG)
+	@dd if=$(BOOT_BIN) of=$(IMG) bs=512 count=1 conv=notrunc
+	@sudo mount -o loop $(IMG) $(FLOPPY)
+	@sudo cp $(LDR_BIN) $(FLOPPY) -v
+	@sudo umount $(FLOPPY)
+
+$(BOOT_BIN) : $(BOOT)
+	@nasm $< -o $@
+
+$(LDR_BIN) : $(LDR)
+	@nasm $< -o $@
 
 clean:
 	@rm -f *.o
 	@rm -f *.bin
 	@rm -f *.com
-	@rm pm.img
+	@rm -f $(IMG)
 	@echo "make clean done!"
