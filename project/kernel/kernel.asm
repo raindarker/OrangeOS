@@ -1,22 +1,14 @@
-  ; ----------------------------------------------------------------------
-  ; 编译连接方法:
-  ; $ rm -f kernel.bin
-  ; $ nasm -f elf -o kernel.o kernel.asm
-  ; $ nasm -f elf -o string.o string.asm
-  ; $ nasm -f elf -o klib.o klib.asm
-  ; $ gcc -c -o start.o start.c
-  ; $ ld -s -Ttext 0x30400 -o kernel.bin kernel.o string.o start.o klib.o
-  ; $ rm -f kernel.o string.o start.o
-  ; $
-  ; ----------------------------------------------------------------------
-
   SELECTOR_KERNEL_CS	equ	8
 
   ; 导入函数
 extern	cstart
+extern	exception_handler
 
   ; 导入全局变量
 extern	gdt_ptr
+extern	idt_ptr
+extern	disp_pos
+
 
 [SECTION .bss]
   StackSpace		resb	2 * 1024
@@ -25,6 +17,23 @@ StackTop:		; 栈顶
 [section .text]	; 代码在此
 
 global _start	; 导出 _start
+
+global	divide_error
+global	single_step_exception
+global	nmi
+global	breakpoint_exception
+global	overflow
+global	bounds_check
+global	inval_opcode
+global	copr_not_available
+global	double_fault
+global	copr_seg_overrun
+global	inval_tss
+global	segment_not_present
+global	stack_exception
+global	general_protection
+global	page_fault
+global	copr_error
 
 _start:
   ; 此时内存看上去是这样的（更详细的内存情况在 LOADER.ASM 中有说明）：
@@ -51,7 +60,7 @@ _start:
   ;
   ; GDT 以及相应的描述符是这样的：
   ;
-  ;                 Descriptors               Selectors
+  ;                   Descriptors               Selectors
   ;              ┏━━━━━━━━━━━━━━━━━━┓
   ;              ┃         Dummy Descriptor           ┃
   ;              ┣━━━━━━━━━━━━━━━━━━┫
@@ -71,16 +80,87 @@ _start:
   ; 把 esp 从 LOADER 挪到 KERNEL
   mov	esp, StackTop	; 堆栈在 bss 段中
 
+  mov	dword [disp_pos], 0
+
   sgdt	[gdt_ptr]	; cstart() 中将会用到 gdt_ptr
   call	cstart		; 在此函数中改变了gdt_ptr，让它指向新的GDT
   lgdt	[gdt_ptr]	; 使用新的GDT
 
-  ;lidt	[idt_ptr]
+  lidt	[idt_ptr]
 
   jmp	SELECTOR_KERNEL_CS:csinit
-csinit:		; “这个跳转指令强制使用刚刚初始化的结构”——<<OS:D&I 2nd>> P90.
+csinit:		; 这个跳转指令强制使用刚刚初始化的结构
 
-  push	0
-  popfd	; Pop top of stack into EFLAGS
+  ;ud2
+  jmp 0x40:0
 
+  ;push	0
+  ;popfd	; Pop top of stack into EFLAGS
+
+  hlt
+
+
+  ; 中断和异常 -- 异常
+divide_error:
+  push	0xFFFFFFFF	; no err code
+  push	0		; vector_no	= 0
+  jmp	exception
+single_step_exception:
+  push	0xFFFFFFFF	; no err code
+  push	1		; vector_no	= 1
+  jmp	exception
+nmi:
+  push	0xFFFFFFFF	; no err code
+  push	2		; vector_no	= 2
+  jmp	exception
+breakpoint_exception:
+  push	0xFFFFFFFF	; no err code
+  push	3		; vector_no	= 3
+  jmp	exception
+overflow:
+  push	0xFFFFFFFF	; no err code
+  push	4		; vector_no	= 4
+  jmp	exception
+bounds_check:
+  push	0xFFFFFFFF	; no err code
+  push	5		; vector_no	= 5
+  jmp	exception
+inval_opcode:
+  push	0xFFFFFFFF	; no err code
+  push	6		; vector_no	= 6
+  jmp	exception
+copr_not_available:
+  push	0xFFFFFFFF	; no err code
+  push	7		; vector_no	= 7
+  jmp	exception
+double_fault:
+  push	8		; vector_no	= 8
+  jmp	exception
+copr_seg_overrun:
+  push	0xFFFFFFFF	; no err code
+  push	9		; vector_no	= 9
+  jmp	exception
+inval_tss:
+  push	10		; vector_no	= A
+  jmp	exception
+segment_not_present:
+  push	11		; vector_no	= B
+  jmp	exception
+stack_exception:
+  push	12		; vector_no	= C
+  jmp	exception
+general_protection:
+  push	13		; vector_no	= D
+  jmp	exception
+page_fault:
+  push	14		; vector_no	= E
+  jmp	exception
+copr_error:
+  push	0xFFFFFFFF	; no err code
+  push	16		; vector_no	= 10h
+  jmp	exception
+
+exception:
+  call	exception_handler
+  add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
   hlt

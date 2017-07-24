@@ -17,19 +17,19 @@ CC		= gcc
 LD		= ld
 ASMBFLAGS	= -I boot/include/
 ASMKFLAGS	= -I include/ -f elf
-CFLAGS		= -m32 -I include/ -c -fno-builtin
+CFLAGS		= -m32 -I include/ -c -fno-builtin -fno-stack-protector
 LDFLAGS		= -melf_i386 -s -Ttext $(ENTRYPOINT)
 DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 
 # This Program
 ORANGESBOOT	= boot/boot.bin boot/loader.bin
-ORANGESKERNEL	= kernel.bin
-OBJS = kernel/kernel.o kernel/start.o lib/kliba.o lib/string.o
-DASMOUTPUT	= kernel.bin.asm
+ORANGESKERNEL = kernel.bin
+OBJS = kernel/kernel.o kernel/start.o kernel/i8259.o kernel/global.o kernel/protect.o lib/klib.o lib/kliba.o lib/string.o
+DASMOUTPUT = kernel.bin.asm
 IMAGE:=OrangeOS.img
 
 # All Phony Targets
-.PHONY : everything final image clean realclean disasm all buildimg
+.PHONY : everything image clean disasm all buildimg
 
 # Default starting position
 everything : $(ORANGESBOOT) $(ORANGESKERNEL)
@@ -39,7 +39,7 @@ all : clean everything
 image : all buildimg
 
 clean :
-	@rm -f $(OBJS) $(ORANGESBOOT) $(ORANGESKERNEL)
+	@rm -f $(OBJS) $(ORANGESBOOT) $(ORANGESKERNEL) $(IMAGE)
 
 disasm :
 	$(DASM) $(DASMFLAGS) $(ORANGESKERNEL) > $(DASMOUTPUT)
@@ -66,7 +66,21 @@ $(ORANGESKERNEL) : $(OBJS)
 kernel/kernel.o : kernel/kernel.asm
 	@$(ASM) $(ASMKFLAGS) -o $@ $<
 
-kernel/start.o : kernel/start.c include/types.h include/const.h include/protect.h
+kernel/start.o: kernel/start.c include/types.h include/const.h include/protect.h \
+		include/proto.h include/string.h
+	@$(CC) $(CFLAGS) -o $@ $<
+
+kernel/i8259.o : kernel/i8259.c include/types.h include/const.h include/protect.h \
+			include/proto.h
+	@$(CC) $(CFLAGS) -o $@ $<
+
+kernel/global.o : kernel/global.c
+	@$(CC) $(CFLAGS) -o $@ $<
+
+kernel/protect.o : kernel/protect.c
+	@$(CC) $(CFLAGS) -o $@ $<
+
+lib/klib.o : lib/klib.c
 	@$(CC) $(CFLAGS) -o $@ $<
 
 lib/kliba.o : lib/kliba.asm

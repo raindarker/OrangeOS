@@ -2,7 +2,7 @@
 
 # Programs, flags, etc.
 ASM	= nasm
-ASMFLAGS	= -I include/
+ASMFLAGS = -I include/
 
 # This Program
 TARGET	= boot.bin loader.bin
