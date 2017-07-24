@@ -1,7 +1,6 @@
 ##################################################
 # Makefile
 ##################################################
-
 BOOT:=boot.asm
 LDR:=loader.asm
 KERNEL:=kernel.asm
@@ -29,8 +28,8 @@ $(LDR_BIN) : $(LDR)
 	@nasm $< -o $@
 
 $(KERNEL_BIN) : $(KERNEL)
-	nasm -f elf -o $(subst .asm,.o,$(KERNEL)) $<
-	ld -s -Ttext 0x30400 -o $@ $(subst .asm,.o,$(KERNEL))
+	@nasm -f elf32 -o $(subst .asm,.o,$(KERNEL)) $<
+	@ld -melf_i386 -s -Ttext 0x30400 -o $@ $(subst .asm,.o,$(KERNEL))
 
 clean:
 	@rm -f *.o
