@@ -1,39 +1,76 @@
-##################################################
-# Makefile
-##################################################
-BOOT:=boot.asm
-LDR:=loader.asm
-KERNEL:=kernel.asm
-BOOT_BIN:=$(subst .asm,.bin,$(BOOT))
-LDR_BIN:=$(subst .asm,.bin,$(LDR))
-KERNEL_BIN:=$(subst .asm,.bin,$(KERNEL))
+#########################
+# Makefile for OrangeOS #
+#########################
 
-IMG:=OrangeOS.img
-FLOPPY:=/mnt/floppy/
+# Entry point of OrangeOS
+# It must have the same value with 'KernelEntryPointPhyAddr' in load.inc!
+ENTRYPOINT	= 0x30400
 
-.PHONY : default
+# Offset of entry point in kernel file
+# It depends on ENTRYPOINT
+ENTRYOFFSET	= 0x400
 
-default : $(BOOT_BIN) $(LDR_BIN) $(KERNEL_BIN)
-	@cp a.img $(IMG)
-	@dd if=$(BOOT_BIN) of=$(IMG) bs=512 count=1 conv=notrunc
-	@sudo mount -o loop $(IMG) $(FLOPPY)
-	@sudo cp $(LDR_BIN) $(FLOPPY) -v
-	@sudo cp $(KERNEL_BIN) $(FLOPPY) -v
-	@sudo umount $(FLOPPY)
+# Programs, flags, etc.
+ASM		= nasm
+DASM	= ndisasm
+CC		= gcc
+LD		= ld
+ASMBFLAGS	= -I boot/include/
+ASMKFLAGS	= -I include/ -f elf
+CFLAGS		= -m32 -I include/ -c -fno-builtin
+LDFLAGS		= -melf_i386 -s -Ttext $(ENTRYPOINT)
+DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 
-$(BOOT_BIN) : $(BOOT)
-	@nasm $< -o $@
+# This Program
+ORANGESBOOT	= boot/boot.bin boot/loader.bin
+ORANGESKERNEL	= kernel.bin
+OBJS = kernel/kernel.o kernel/start.o lib/kliba.o lib/string.o
+DASMOUTPUT	= kernel.bin.asm
+IMAGE:=OrangeOS.img
 
-$(LDR_BIN) : $(LDR)
-	@nasm $< -o $@
+# All Phony Targets
+.PHONY : everything final image clean realclean disasm all buildimg
 
-$(KERNEL_BIN) : $(KERNEL)
-	@nasm -f elf32 -o $(subst .asm,.o,$(KERNEL)) $<
-	@ld -melf_i386 -s -Ttext 0x30400 -o $@ $(subst .asm,.o,$(KERNEL))
+# Default starting position
+everything : $(ORANGESBOOT) $(ORANGESKERNEL)
 
-clean:
-	@rm -f *.o
-	@rm -f *.bin
-	@rm -f *.com
-	@rm -f $(IMG)
-	@echo "make clean done!"
+all : clean everything
+
+image : all buildimg
+
+clean :
+	@rm -f $(OBJS) $(ORANGESBOOT) $(ORANGESKERNEL)
+
+disasm :
+	$(DASM) $(DASMFLAGS) $(ORANGESKERNEL) > $(DASMOUTPUT)
+
+# We assume that "a.img" exists in current folder
+buildimg :
+	@cp a.img $(IMAGE)
+	@dd if=boot/boot.bin of=$(IMAGE) bs=512 count=1 conv=notrunc
+	@sudo mount -o loop $(IMAGE) /mnt/floppy/
+	@sudo cp -fv boot/loader.bin /mnt/floppy/
+	@sudo cp -fv kernel.bin /mnt/floppy
+	@sudo umount /mnt/floppy
+
+boot/boot.bin : boot/boot.asm boot/include/load.inc boot/include/fat12hdr.inc
+	@$(ASM) $(ASMBFLAGS) -o $@ $<
+
+boot/loader.bin : boot/loader.asm boot/include/load.inc \
+			boot/include/fat12hdr.inc boot/include/pm.inc
+	@$(ASM) $(ASMBFLAGS) -o $@ $<
+
+$(ORANGESKERNEL) : $(OBJS)
+	@$(LD) $(LDFLAGS) -o $(ORANGESKERNEL) $(OBJS)
+
+kernel/kernel.o : kernel/kernel.asm
+	@$(ASM) $(ASMKFLAGS) -o $@ $<
+
+kernel/start.o : kernel/start.c include/types.h include/const.h include/protect.h
+	@$(CC) $(CFLAGS) -o $@ $<
+
+lib/kliba.o : lib/kliba.asm
+	@$(ASM) $(ASMKFLAGS) -o $@ $<
+
+lib/string.o : lib/string.asm
+	@$(ASM) $(ASMKFLAGS) -o $@ $<
