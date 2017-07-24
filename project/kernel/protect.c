@@ -14,22 +14,39 @@ static void init_idt_desc(unsigned char vector, u8 desc_type,
                           int_handler handler, unsigned char privilege);
 
 /* 中断处理函数 */
-void divide_error();
-void single_step_exception();
-void nmi();
-void breakpoint_exception();
-void overflow();
-void bounds_check();
-void inval_opcode();
-void copr_not_available();
-void double_fault();
-void copr_seg_overrun();
-void inval_tss();
-void segment_not_present();
-void stack_exception();
-void general_protection();
-void page_fault();
-void copr_error();
+extern void divide_error();
+extern void single_step_exception();
+extern void nmi();
+extern void breakpoint_exception();
+extern void overflow();
+extern void bounds_check();
+extern void inval_opcode();
+extern void copr_not_available();
+extern void double_fault();
+extern void copr_seg_overrun();
+extern void inval_tss();
+extern void segment_not_present();
+extern void stack_exception();
+extern void general_protection();
+extern void page_fault();
+extern void copr_error();
+extern void hwint00();
+extern void hwint01();
+extern void hwint02();
+extern void hwint03();
+extern void hwint04();
+extern void hwint05();
+extern void hwint06();
+extern void hwint07();
+extern void hwint08();
+extern void hwint09();
+extern void hwint10();
+extern void hwint11();
+extern void hwint12();
+extern void hwint13();
+extern void hwint14();
+extern void hwint15();
+
 
 /*======================================================================*
   init_prot
@@ -54,29 +71,53 @@ void init_prot() {
 
     init_idt_desc(INT_VECTOR_COPROC_NOT, DA_386IGate, copr_not_available, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_DOUBLE_FAULT,	DA_386IGate,
-                  double_fault,		PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_DOUBLE_FAULT, DA_386IGate, double_fault, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_COPROC_SEG,	DA_386IGate,
-                  copr_seg_overrun,		PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_COPROC_SEG, DA_386IGate, copr_seg_overrun, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_INVAL_TSS,	DA_386IGate,
-                  inval_tss,		PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_INVAL_TSS,	DA_386IGate, inval_tss, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_SEG_NOT,	DA_386IGate,
-                  segment_not_present,	PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_SEG_NOT, DA_386IGate, segment_not_present, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_STACK_FAULT,	DA_386IGate,
-                  stack_exception,		PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_STACK_FAULT, DA_386IGate, stack_exception, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_PROTECTION,	DA_386IGate,
-                  general_protection,	PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_PROTECTION, DA_386IGate, general_protection, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_PAGE_FAULT,	DA_386IGate,
-                  page_fault,		PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_PAGE_FAULT, DA_386IGate, page_fault, PRIVILEGE_KRNL);
 
-    init_idt_desc(INT_VECTOR_COPROC_ERR,	DA_386IGate,
-                  copr_error,		PRIVILEGE_KRNL);
+    init_idt_desc(INT_VECTOR_COPROC_ERR, DA_386IGate, copr_error, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 0, DA_386IGate, hwint00, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 1, DA_386IGate, hwint01, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 2, DA_386IGate, hwint02, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 3, DA_386IGate, hwint03, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 4, DA_386IGate, hwint04, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 5, DA_386IGate, hwint05, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 6, DA_386IGate, hwint06, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ0 + 7, DA_386IGate, hwint07, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 0, DA_386IGate, hwint08, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 1, DA_386IGate, hwint09, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 2, DA_386IGate, hwint10, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 3, DA_386IGate, hwint11, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 4, DA_386IGate, hwint12, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 5, DA_386IGate, hwint13, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 6, DA_386IGate, hwint14, PRIVILEGE_KRNL);
+
+    init_idt_desc(INT_VECTOR_IRQ8 + 7, DA_386IGate, hwint15, PRIVILEGE_KRNL);
 }
 
 /*======================================================================*
@@ -85,8 +126,7 @@ void init_prot() {
   初始化 386 中断门
   *======================================================================*/
 static void init_idt_desc(unsigned char vector, u8 desc_type,
-                          int_handler handler, unsigned char privilege)
-{
+                          int_handler handler, unsigned char privilege) {
     GATE *	p_gate	= &idt[vector];
     u32	base	= (u32)handler;
     p_gate->offset_low	= base & 0xFFFF;
