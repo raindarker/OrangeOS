@@ -3,11 +3,8 @@
 #include "protect.h"
 #include "proto.h"
 
-extern int         disp_pos;
-extern u8          gdt_ptr[6];	/* 0~15:Limit  16~47:Base */
-extern DESCRIPTOR	gdt[GDT_SIZE];
-extern u8          idt_ptr[6];	/* 0~15:Limit  16~47:Base */
-extern GATE        idt[IDT_SIZE];
+extern int          disp_pos;
+extern gate_t       idt[IDT_SIZE];
 
 /* 本文件内函数声明 */
 static void init_idt_desc(unsigned char vector, u8 desc_type,
@@ -127,7 +124,7 @@ void init_prot() {
   *======================================================================*/
 static void init_idt_desc(unsigned char vector, u8 desc_type,
                           int_handler handler, unsigned char privilege) {
-    GATE *	p_gate	= &idt[vector];
+    gate_t*	p_gate	= &idt[vector];
     u32	base	= (u32)handler;
     p_gate->offset_low	= base & 0xFFFF;
     p_gate->selector	= SELECTOR_KERNEL_CS;

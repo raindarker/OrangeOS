@@ -12,11 +12,10 @@
 #include "proto.h"
 #include "string.h"
 
-extern int         disp_pos;
-extern u8          gdt_ptr[6];	/* 0~15:Limit  16~47:Base */
-extern DESCRIPTOR	gdt[GDT_SIZE];
-extern u8          idt_ptr[6];	/* 0~15:Limit  16~47:Base */
-extern GATE        idt[IDT_SIZE];
+extern u8           gdt_ptr[6];	/* 0~15:Limit  16~47:Base */
+extern descriptor_t gdt[GDT_SIZE];
+extern u8           idt_ptr[6];	/* 0~15:Limit  16~47:Base */
+extern gate_t       idt[IDT_SIZE];
 
 
 /*======================================================================*
@@ -34,13 +33,13 @@ void cstart() {
     /* gdt_ptr[6] 共 6 个字节：0~15:Limit  16~47:Base。用作 sgdt/lgdt 的参数。*/
     u16* p_gdt_limit = (u16*)(&gdt_ptr[0]);
     u32* p_gdt_base  = (u32*)(&gdt_ptr[2]);
-    *p_gdt_limit = GDT_SIZE * sizeof(DESCRIPTOR) - 1;
+    *p_gdt_limit = GDT_SIZE * sizeof(descriptor_t) - 1;
     *p_gdt_base  = (u32)&gdt;
 
     /* idt_ptr[6] 共 6 个字节：0~15:Limit  16~47:Base。用作 sidt/lidt 的参数。*/
     u16* p_idt_limit = (u16*)(&idt_ptr[0]);
     u32* p_idt_base  = (u32*)(&idt_ptr[2]);
-    *p_idt_limit = IDT_SIZE * sizeof(GATE) - 1;
+    *p_idt_limit = IDT_SIZE * sizeof(gate_t) - 1;
     *p_idt_base  = (u32)&idt;
 
     init_prot();

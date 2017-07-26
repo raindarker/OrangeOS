@@ -4,6 +4,7 @@
 extern	cstart
 extern	exception_handler
 extern	spurious_irq
+extern  kernel_main
 
   ; 导入全局变量
 extern	gdt_ptr
@@ -108,7 +109,7 @@ _start:
   jmp	SELECTOR_KERNEL_CS:csinit
 csinit:		; 这个跳转指令强制使用刚刚初始化的结构
   sti
-  hlt
+  jmp   kernel_main
 
   ; 中断和异常 -- 硬件中断
   ; ---------------------------------
@@ -122,7 +123,7 @@ csinit:		; 这个跳转指令强制使用刚刚初始化的结构
 
 ALIGN   16
 hwint00:                ; Interrupt routine for irq 0 (the clock).
-  hwint_master    0
+  iretd
 
 ALIGN   16
 hwint01:                ; Interrupt routine for irq 1 (keyboard)
