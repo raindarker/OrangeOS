@@ -6,11 +6,38 @@
  */
 
 #include "proto.h"
+#include "proc.h"
+#include "protect.h"
+#include "const.h"
+
+extern descriptor_t  gdt[GDT_SIZE];
+extern process_t     process_table[NR_TASKS];
+extern process_t*    process_ready;
+extern char          task_stack[STACK_SIZE_TOTAL];
 
 int kernel_main(void) {
     disp_str("-----\"kernel_main\" begins-----\n");
-    while (1) {
+    process_t* process = process_table;
 
+	process->ldt_sel	= SELECTOR_LDT_FIRST;
+	memcpy(&process->ldts[0], &gdt[SELECTOR_KERNEL_CS >> 3], sizeof(descriptor_t));
+	process->ldts[0].attr1 = DA_C | PRIVILEGE_TASK << 5;	// change the DPL
+	memcpy(&process->ldts[1], &gdt[SELECTOR_KERNEL_DS >> 3], sizeof(descriptor_t));
+	process->ldts[1].attr1 = DA_DRW | PRIVILEGE_TASK << 5;	// change the DPL
+
+	process->regs.cs = (0 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | RPL_TASK;
+	process->regs.ds = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | RPL_TASK;
+	process->regs.es = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | RPL_TASK;
+	process->regs.fs = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | RPL_TASK;
+	process->regs.ss = (8 & SA_RPL_MASK & SA_TI_MASK) | SA_TIL | RPL_TASK;
+	process->regs.gs = (SELECTOR_KERNEL_GS & SA_RPL_MASK) | RPL_TASK;
+	process->regs.eip = (u32)testA;
+	process->regs.esp = (u32)(task_stack + STACK_SIZE_TOTAL);
+	process->regs.eflags = 0x1202;	// IF=1, IOPL=1, bit 2 is always 1.
+
+	process_ready = process_table;
+	restart();
+    while (1) {
     }
 }
 

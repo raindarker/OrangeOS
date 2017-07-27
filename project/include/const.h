@@ -11,6 +11,8 @@
 /* GDT 和 IDT 中描述符的个数 */
 #define	GDT_SIZE	128
 #define	IDT_SIZE	256
+/* 每个任务有一个单独的 LDT, 每个 LDT 中的描述符个数: */
+#define LDT_SIZE    2
 
 /* 权限 */
 #define	PRIVILEGE_KRNL	0

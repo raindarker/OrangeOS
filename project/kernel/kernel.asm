@@ -1,4 +1,4 @@
-  SELECTOR_KERNEL_CS	equ	8
+%include "sconst.inc"
 
   ; 导入函数
 extern	cstart
@@ -10,6 +10,8 @@ extern  kernel_main
 extern	gdt_ptr
 extern	idt_ptr
 extern	disp_pos
+extern  process_ready
+extern  tss
 
 
 [SECTION .bss]
@@ -19,6 +21,7 @@ StackTop:		; 栈顶
 [section .text]	; 代码在此
 
 global _start	; 导出 _start
+global restart
 
 global	divide_error
 global	single_step_exception
@@ -108,7 +111,10 @@ _start:
 
   jmp	SELECTOR_KERNEL_CS:csinit
 csinit:		; 这个跳转指令强制使用刚刚初始化的结构
-  sti
+  xor	eax, eax
+  mov	ax, SELECTOR_TSS
+  ltr	ax
+
   jmp   kernel_main
 
   ; 中断和异常 -- 硬件中断
@@ -259,3 +265,22 @@ exception:
   call	exception_handler
   add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
   hlt
+
+  ; ====================================================================================
+  ;                                   restart
+  ; ====================================================================================
+restart:
+  mov	esp, [process_ready]
+  lldt	[esp + P_LDT_SEL]
+  lea	eax, [esp + P_STACKTOP]
+  mov	dword [tss + TSS3_S_SP0], eax
+
+  pop	gs
+  pop	fs
+  pop	es
+  pop	ds
+  popad
+
+  add	esp, 4
+
+  iretd
