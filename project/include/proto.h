@@ -18,6 +18,7 @@ void disp_color_str(char * info, int color);
 /* protect.c */
 void init_prot();
 void init_8259A();
+u32	seg2phys(u16 seg);
 
 /* klib.c */
 void delay(int time);

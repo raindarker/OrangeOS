@@ -63,27 +63,25 @@ boot/loader.bin : boot/loader.asm boot/include/load.inc \
 $(ORANGESKERNEL) : $(OBJS)
 	@$(LD) $(LDFLAGS) -o $(ORANGESKERNEL) $(OBJS)
 
-kernel/kernel.o : kernel/kernel.asm
+kernel/kernel.o : kernel/kernel.asm include/sconst.inc
 	@$(ASM) $(ASMKFLAGS) -o $@ $<
 
-kernel/start.o: kernel/start.c include/types.h include/const.h include/protect.h \
-		include/proto.h include/string.h
+kernel/start.o: kernel/start.c include/types.h include/const.h include/protect.h include/types.h include/proto.h include/string.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
-kernel/main.o: kernel/main.c include/proto.h
+kernel/main.o: kernel/main.c include/proto.h include/types.h include/proc.h include/const.h include/protect.h include/protect.h include/const.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
-kernel/i8259.o : kernel/i8259.c include/types.h include/const.h include/protect.h \
-			include/proto.h
+kernel/i8259.o: kernel/i8259.c include/types.h include/const.h include/protect.h include/types.h include/proto.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
-kernel/global.o : kernel/global.c
+kernel/global.o: kernel/global.c include/types.h include/const.h include/protect.h include/types.h include/proto.h include/proc.h include/const.h include/protect.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
-kernel/protect.o : kernel/protect.c
+kernel/protect.o: kernel/protect.c include/types.h include/const.h include/proc.h include/const.h include/protect.h include/types.h include/protect.h include/proto.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
-lib/klib.o : lib/klib.c
+lib/klib.o: lib/klib.c include/types.h include/const.h include/protect.h include/types.h include/proto.h include/string.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
 lib/kliba.o : lib/kliba.asm

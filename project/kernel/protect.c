@@ -10,9 +10,6 @@ extern gate_t       idt[IDT_SIZE];
 extern descriptor_t gdt[GDT_SIZE];
 extern process_t    process_table[NR_TASKS];
 
-/* 本文件内函数声明 */
-static void init_idt_desc(unsigned char vector, u8 desc_type,
-                          int_handler handler, unsigned char privilege);
 
 /* 中断处理函数 */
 extern void divide_error();
@@ -80,7 +77,7 @@ u32 seg2phys(u16 seg) {
   *----------------------------------------------------------------------*
   初始化段描述符
   *======================================================================*/
-void init_descriptor(descriptor_t *p_desc, u32 base, u32 limit, u16 attribute) {
+static void init_descriptor(descriptor_t *p_desc, u32 base, u32 limit, u16 attribute) {
     p_desc->limit_low	= limit & 0x0FFFF;
     p_desc->base_low	= base & 0x0FFFF;
     p_desc->base_mid	= (base >> 16) & 0x0FF;
