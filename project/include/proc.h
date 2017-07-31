@@ -8,6 +8,7 @@
 #ifndef __ORANGE_PROC_H__
 #define __ORANGE_PROC_H__
 #include "const.h"
+#include "types.h"
 #include "protect.h"
 
 typedef struct stack_frame {
@@ -36,15 +37,21 @@ typedef struct process {
 	u16 ldt_sel;                  /* gdt selector giving ldt base and limit */
 	descriptor_t ldts[LDT_SIZE];  /* local descriptors for code and data */
 	u32 pid;                      /* process id passed in from MM */
-	char p_name[16];              /* name of the process */
+	char p_name[32];              /* name of the process */
 } process_t;
 
+typedef struct task {
+    task_func  initial_eip;
+    int        stack_size;
+    char       name[32];
+} task_t;
 
 /* Number of tasks */
-#define NR_TASKS	1
+#define NR_TASKS	2
 
 /* stacks of tasks */
 #define STACK_SIZE_TESTA	0x8000
-#define STACK_SIZE_TOTAL	STACK_SIZE_TESTA
+#define STACK_SIZE_TESTB    0x8000
+#define STACK_SIZE_TOTAL    (STACK_SIZE_TESTA + STACK_SIZE_TESTB)
 
 #endif /* __ORANGE_PROC_H__ */

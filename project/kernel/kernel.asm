@@ -5,6 +5,7 @@ extern	cstart
 extern  kernel_main
 extern	exception_handler
 extern	spurious_irq
+extern  clock_handler
 extern	disp_str
 
   ; 导入全局变量
@@ -109,9 +110,9 @@ _start:
 
   mov	dword [disp_pos], 0
 
-  sgdt	[gdt_ptr]	; cstart() 中将会用到 gdt_ptr
-  call	cstart		; 在此函数中改变了gdt_ptr，让它指向新的GDT
-  lgdt	[gdt_ptr]	; 使用新的GDT
+  sgdt	[gdt_ptr]
+  call	cstart
+  lgdt	[gdt_ptr]
 
   lidt	[idt_ptr]
 
@@ -158,14 +159,15 @@ hwint00:                ; Interrupt routine for irq 0 (the clock).
 
   sti
 
-  push  clock_int_msg
-  call  disp_str
+  push  0
+  call  clock_handler
   add esp,4
 
   cli
 
   mov esp, [process_ready]	; 离开内核栈
 
+  lldt [esp + P_LDT_SEL]
   lea eax, [esp + P_STACKTOP]
   mov dword [tss + TSS3_S_SP0], eax
 

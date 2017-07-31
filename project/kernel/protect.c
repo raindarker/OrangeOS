@@ -90,6 +90,10 @@ static void init_descriptor(descriptor_t *p_desc, u32 base, u32 limit, u16 attri
   init_prot
   *======================================================================*/
 void init_prot() {
+    int i;
+    process_t* process = process_table;
+    u16 selector_ldt = INDEX_LDT_FIRST << 3;
+
     init_8259A();
 
     // 全部初始化成中断门(没有陷阱门)
@@ -136,10 +140,14 @@ void init_prot() {
     tss.iobase = sizeof(tss); /* 没有I/O许可位图 */
 
     /* 填充 GDT 中进程的 LDT 的描述符 */
-    init_descriptor(&gdt[INDEX_LDT_FIRST],
-                    vir2phys(seg2phys(SELECTOR_KERNEL_DS), process_table[0].ldts),
-                    LDT_SIZE * sizeof(descriptor_t) - 1,
-                    DA_LDT);
+    for (i = 0; i < NR_TASKS; i++) {
+        init_descriptor(&gdt[selector_ldt >> 3],
+                        vir2phys(seg2phys(SELECTOR_KERNEL_DS), process_table[i].ldts),
+                        LDT_SIZE * sizeof(descriptor_t) - 1,
+                        DA_LDT);
+        process++;
+        selector_ldt += 1 << 3;
+    }
 }
 
 /*======================================================================*

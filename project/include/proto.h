@@ -28,4 +28,5 @@ void restart(void);
 
 /* main.c */
 void testA(void);
+void testB(void);
 #endif /* __ORANGE_PROTO_H__ */
