@@ -14,6 +14,7 @@ extern descriptor_t  gdt[GDT_SIZE];
 extern process_t     process_table[NR_TASKS];
 extern process_t*    process_ready;
 extern char          task_stack[STACK_SIZE_TOTAL];
+extern int           g_re_enter;
 
 int kernel_main(void) {
     disp_str("-----\"kernel_main\" begins-----\n");
@@ -34,6 +35,8 @@ int kernel_main(void) {
 	process->regs.eip = (u32)testA;
 	process->regs.esp = (u32)(task_stack + STACK_SIZE_TOTAL);
 	process->regs.eflags = 0x1202;	// IF=1, IOPL=1, bit 2 is always 1.
+
+    g_re_enter = -1;
 
 	process_ready = process_table;
 	restart();

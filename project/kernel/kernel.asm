@@ -13,6 +13,7 @@ extern	idt_ptr
 extern  process_ready
 extern  tss
 extern	disp_pos
+extern	g_re_enter
 
 bits 32
 
@@ -144,22 +145,32 @@ hwint00:                ; Interrupt routine for irq 0 (the clock).
   mov ds, dx
   mov es, dx
 
-  mov esp, StackTop   ; 切到内核栈
-
   inc byte [gs:0]     ; 改变屏幕第 0 行, 第 0 列的字符
 
   mov al, EOI         ;   re_enable
   out INT_M_CTL, al   ;   master 8259
 
+  inc dword [g_re_enter]
+  cmp dword [g_re_enter], 0
+  jne .re_enter
+
+  mov esp, StackTop   ; 切到内核栈
+
+  sti
+
   push  clock_int_msg
   call  disp_str
   add esp,4
+
+  cli
 
   mov esp, [process_ready]	; 离开内核栈
 
   lea eax, [esp + P_STACKTOP]
   mov dword [tss + TSS3_S_SP0], eax
 
+.re_enter:
+  dec dword [g_re_enter]
   pop gs	;  |
   pop fs	;  |
   pop es	;  | 恢复原寄存器值
