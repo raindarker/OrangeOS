@@ -4,10 +4,30 @@
 #include "proto.h"
 
 
+extern irq_handler   g_irq_table[NR_IRQ];
+
+/*======================================================================*
+  spurious_irq
+  *======================================================================*/
+void spurious_irq(int irq) {
+    disp_str("spurious_irq: ");
+    disp_int(irq);
+    disp_str("\n");
+}
+
+/*======================================================================*
+  set_irq_handler
+  *======================================================================*/
+void set_irq_handler(int irq, irq_handler handler) {
+	disable_irq(irq);
+	g_irq_table[irq] = handler;
+}
+
 /*======================================================================*
   init_8259A
   *======================================================================*/
 void init_8259A() {
+    int i;
     /* Master 8259, ICW1. */
     out_byte(INT_M_CTL,	0x11);
     /* Slave  8259, ICW1. */
@@ -25,16 +45,12 @@ void init_8259A() {
     /* Slave  8259, ICW4. */
     out_byte(INT_S_CTLMASK,	0x1);
     /* Master 8259, OCW1.  */
-    out_byte(INT_M_CTLMASK,	0xFE);
+    out_byte(INT_M_CTLMASK,	0xFF);
     /* Slave  8259, OCW1.  */
     out_byte(INT_S_CTLMASK,	0xFF);
-}
 
-/*======================================================================*
-  spurious_irq
-  *======================================================================*/
-void spurious_irq(int irq) {
-    disp_str("spurious_irq: ");
-    disp_int(irq);
-    disp_str("\n");
+    for (i = 0; i < NR_IRQ; i++) {
+        g_irq_table[i] = spurious_irq;
+    }
+
 }

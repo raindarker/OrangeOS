@@ -22,3 +22,5 @@ task_t        task_table[NR_TASKS] = {
     {testB, STACK_SIZE_TESTB, "testB"},
     {testC, STACK_SIZE_TESTC, "testC"}
 };
+
+irq_handler   g_irq_table[NR_IRQ];

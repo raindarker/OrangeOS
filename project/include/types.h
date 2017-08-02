@@ -14,5 +14,6 @@ typedef	unsigned char       u8;
 
 typedef	void (*int_handler)();
 typedef void (*task_func)();
+typedef	void (*irq_handler)(int irq);
 
 #endif /* __ORANGE_TYPES_H__ */

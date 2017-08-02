@@ -15,6 +15,7 @@ extern  process_ready
 extern  tss
 extern	disp_pos
 extern	g_re_enter
+extern  g_irq_table
 
 bits 32
 
@@ -127,60 +128,30 @@ csinit:		; 这个跳转指令强制使用刚刚初始化的结构
   ; 中断和异常 -- 硬件中断
   ; ---------------------------------
 %macro  hwint_master    1
-  push    %1
-  call    spurious_irq
-  add     esp, 4
-  hlt
+  call	save
+  in	al, INT_M_CTLMASK   ;  |
+  or	al, (1 << %1)       ;  | 屏蔽当前中断
+  out	INT_M_CTLMASK, al   ;  |
+
+  mov	al, EOI             ;  | 置EOI位
+  out	INT_M_CTL, al       ;  |
+
+  sti                       ; CPU在响应中断的过程中会自动关中断，这句之后就允许响应新的中断
+  push	%1                  ;  |
+  call	[g_irq_table + 4 * %1];  | 中断处理程序
+  pop	ecx			        ;  |
+  cli
+
+  in	al, INT_M_CTLMASK   ;  |
+  and	al, ~(1 << %1)      ;  | 恢复接受当前中断
+  out	INT_M_CTLMASK, al   ;  |
+  ret
 %endmacro
   ; ---------------------------------
 
 ALIGN   16
 hwint00:                ; Interrupt routine for irq 0 (the clock).
-  sub esp, 4
-  pushad	;  |
-  push ds	;  |
-  push es	;  | 保存原寄存器值
-  push fs	;  |
-  push gs	;  |
-  mov dx, ss
-  mov ds, dx
-  mov es, dx
-
-  inc byte [gs:0]     ; 改变屏幕第 0 行, 第 0 列的字符
-
-  mov al, EOI         ;   re_enable
-  out INT_M_CTL, al   ;   master 8259
-
-  inc dword [g_re_enter]
-  cmp dword [g_re_enter], 0
-  jne .re_enter
-
-  mov esp, StackTop   ; 切到内核栈
-
-  sti
-
-  push  0
-  call  clock_handler
-  add esp,4
-
-  cli
-
-  mov esp, [process_ready]	; 离开内核栈
-
-  lldt [esp + P_LDT_SEL]
-  lea eax, [esp + P_STACKTOP]
-  mov dword [tss + TSS3_S_SP0], eax
-
-.re_enter:
-  dec dword [g_re_enter]
-  pop gs	;  |
-  pop fs	;  |
-  pop es	;  | 恢复原寄存器值
-  pop ds	;  |
-  popad     ;  |
-  add esp, 4
-
-  iretd
+  hwint_master    0
 
 ALIGN   16
 hwint01:                ; Interrupt routine for irq 1 (keyboard)
@@ -317,6 +288,32 @@ exception:
   add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
   hlt
 
+; ====================================================================================
+;                                   save
+; ====================================================================================
+save:
+        pushad          ;  |
+        push    ds      ;  |
+        push    es      ;  | 保存原寄存器值
+        push    fs      ;  |
+        push    gs      ;  |
+        mov     dx, ss
+        mov     ds, dx
+        mov     es, dx
+
+        mov     eax, esp                    ;eax = 进程表起始地址
+
+        inc     dword [g_re_enter]          ;g_re_enter++;
+        cmp     dword [g_re_enter], 0       ;if(g_re_enter ==0)
+        jne     .1                          ;{
+        mov     esp, StackTop               ;  mov esp, StackTop <--切换到内核栈
+        push    restart                     ;  push restart
+        jmp     [eax + RETADR - P_STACKBASE];  return;
+.1:                                         ;} else { 已经在内核栈，不需要再切换
+        push    restart_reenter             ;  push restart_reenter
+        jmp     [eax + RETADR - P_STACKBASE];  return;
+                                            ;}
+
   ; ====================================================================================
   ;                                   restart
   ; ====================================================================================
@@ -325,6 +322,8 @@ restart:
   lldt	[esp + P_LDT_SEL]
   lea	eax, [esp + P_STACKTOP]
   mov	dword [tss + TSS3_S_SP0], eax
+restart_reenter:
+  dec dword [g_re_enter]
   pop	gs
   pop	fs
   pop	es

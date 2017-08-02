@@ -8,11 +8,17 @@
 #include "proto.h"
 #include "proc.h"
 
-extern process_t process_table[NR_TASKS];
+extern process_t  process_table[NR_TASKS];
 extern process_t* process_ready;
+extern int        g_re_enter;
 
 void clock_handler(int irq) {
     disp_str("#");
+    if (g_re_enter != 0) {
+        disp_str("!");
+        return;
+    }
+
     process_ready++;
     if (process_ready >= process_table + NR_TASKS) {
         process_ready = process_table;

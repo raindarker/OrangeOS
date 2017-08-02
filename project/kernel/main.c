@@ -18,6 +18,8 @@ extern char          task_stack[STACK_SIZE_TOTAL];
 extern int           g_re_enter;
 extern task_t        task_table[NR_TASKS];
 
+extern void clock_handler(int irq);
+
 int kernel_main(void) {
     disp_str("-----\"kernel_main\" begins-----\n");
     task_t* task = task_table;
@@ -52,9 +54,13 @@ int kernel_main(void) {
 		selector_ldt += 1 << 3;
     }
 
-    g_re_enter = -1;
+    g_re_enter = 0;
 
 	process_ready = process_table;
+
+    set_irq_handler(CLOCK_IRQ, clock_handler);
+    enable_irq(CLOCK_IRQ);
+
 	restart();
     while (1) {
     }
