@@ -16,6 +16,7 @@ extern  tss
 extern	disp_pos
 extern	g_re_enter
 extern  g_irq_table
+extern  g_syscall_table
 
 bits 32
 
@@ -30,6 +31,7 @@ StackTop:		; 栈顶
 
 global _start	; 导出 _start
 global restart
+global sys_call
 
 global	divide_error
 global	single_step_exception
@@ -139,7 +141,7 @@ csinit:		; 这个跳转指令强制使用刚刚初始化的结构
   sti                       ; CPU在响应中断的过程中会自动关中断，这句之后就允许响应新的中断
   push	%1                  ;  |
   call	[g_irq_table + 4 * %1];  | 中断处理程序
-  pop	ecx			        ;  |
+  pop	ecx                 ;  |
   cli
 
   in	al, INT_M_CTLMASK   ;  |
@@ -288,31 +290,42 @@ exception:
   add	esp, 4*2	; 让栈顶指向 EIP，堆栈中从顶向下依次是：EIP、CS、EFLAGS
   hlt
 
-; ====================================================================================
-;                                   save
-; ====================================================================================
+  ; ====================================================================================
+  ;                                   save
+  ; ====================================================================================
 save:
-        pushad          ;  |
-        push    ds      ;  |
-        push    es      ;  | 保存原寄存器值
-        push    fs      ;  |
-        push    gs      ;  |
-        mov     dx, ss
-        mov     ds, dx
-        mov     es, dx
+  pushad          ;  |
+  push    ds      ;  |
+  push    es      ;  | 保存原寄存器值
+  push    fs      ;  |
+  push    gs      ;  |
+  mov     dx, ss
+  mov     ds, dx
+  mov     es, dx
 
-        mov     eax, esp                    ;eax = 进程表起始地址
+  mov     esi, esp                    ;esi = 进程表起始地址
 
-        inc     dword [g_re_enter]          ;g_re_enter++;
-        cmp     dword [g_re_enter], 0       ;if(g_re_enter ==0)
-        jne     .1                          ;{
-        mov     esp, StackTop               ;  mov esp, StackTop <--切换到内核栈
-        push    restart                     ;  push restart
-        jmp     [eax + RETADR - P_STACKBASE];  return;
-.1:                                         ;} else { 已经在内核栈，不需要再切换
-        push    restart_reenter             ;  push restart_reenter
-        jmp     [eax + RETADR - P_STACKBASE];  return;
-                                            ;}
+  inc     dword [g_re_enter]          ;g_re_enter++;
+  cmp     dword [g_re_enter], 0       ;if(g_re_enter ==0)
+  jne     .1                          ;{
+  mov     esp, StackTop               ;  mov esp, StackTop <--切换到内核栈
+  push    restart                     ;  push restart
+  jmp     [esi + RETADR - P_STACKBASE];  return;
+  .1:                                         ;} else { 已经在内核栈，不需要再切换
+  push    restart_reenter             ;  push restart_reenter
+  jmp     [esi + RETADR - P_STACKBASE];  return;
+  ;}
+
+  ; ====================================================================================
+  ;                                 sys_call
+  ; ====================================================================================
+sys_call:
+  call    save
+  sti
+  call    [g_syscall_table + eax * 4]
+  mov     [esi + EAXREG - P_STACKBASE], eax
+  cli
+  ret
 
   ; ====================================================================================
   ;                                   restart
@@ -323,7 +336,7 @@ restart:
   lea	eax, [esp + P_STACKTOP]
   mov	dword [tss + TSS3_S_SP0], eax
 restart_reenter:
-  dec dword [g_re_enter]
+  dec   dword [g_re_enter]
   pop	gs
   pop	fs
   pop	es

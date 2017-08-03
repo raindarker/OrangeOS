@@ -11,6 +11,7 @@ u8            idt_ptr[6];	/* 0~15:Limit  16~47:Base */
 gate_t        idt[IDT_SIZE];
 
 int           g_re_enter;
+int           g_ticks;
 
 tss_t         tss;
 process_t*    process_ready;
@@ -24,3 +25,7 @@ task_t        task_table[NR_TASKS] = {
 };
 
 irq_handler   g_irq_table[NR_IRQ];
+
+system_call   g_syscall_table[NR_SYS_CALL] = {
+    sys_get_ticks
+};

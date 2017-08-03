@@ -30,4 +30,12 @@ void restart(void);
 void testA(void);
 void testB(void);
 void testC(void);
+
+/* proc.c */
+int sys_get_ticks(void);        /* sys_call */
+
+/* syscall.asm */
+void sys_call(void);             /* int_handler */
+int get_ticks(void);
+
 #endif /* __ORANGE_PROTO_H__ */

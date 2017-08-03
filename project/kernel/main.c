@@ -67,10 +67,9 @@ int kernel_main(void) {
 }
 
 void testA() {
-    int i = 0;
     while (1) {
         disp_str("A");
-        disp_int(i++);
+        disp_int(get_ticks());
         disp_str(".");
         delay(1);
     }

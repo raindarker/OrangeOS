@@ -11,9 +11,12 @@
 extern process_t  process_table[NR_TASKS];
 extern process_t* process_ready;
 extern int        g_re_enter;
+extern int        g_ticks;
 
 void clock_handler(int irq) {
     disp_str("#");
+    g_ticks++;
+
     if (g_re_enter != 0) {
         disp_str("!");
         return;
