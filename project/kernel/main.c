@@ -18,8 +18,6 @@ extern char          task_stack[STACK_SIZE_TOTAL];
 extern int           g_re_enter;
 extern task_t        task_table[NR_TASKS];
 
-extern void clock_handler(int irq);
-
 int kernel_main(void) {
     disp_str("-----\"kernel_main\" begins-----\n");
     task_t* task = task_table;
@@ -58,6 +56,11 @@ int kernel_main(void) {
 
 	process_ready = process_table;
 
+    /* 初始化 8253 PIT */
+    out_byte(TIMER_MODE, RATE_GENERATOR);
+    out_byte(TIMER0, (u8) (TIMER_FREQ/HZ) );
+    out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
+
     set_irq_handler(CLOCK_IRQ, clock_handler);
     enable_irq(CLOCK_IRQ);
 
@@ -71,7 +74,7 @@ void testA() {
         disp_str("A");
         disp_int(get_ticks());
         disp_str(".");
-        delay(1);
+        milli_delay(1000);
     }
 }
 
@@ -81,7 +84,7 @@ void testB() {
         disp_str("B");
         disp_int(i++);
         disp_str(".");
-        delay(1);
+        milli_delay(1000);
     }
 }
 
@@ -91,6 +94,6 @@ void testC() {
         disp_str("C");
         disp_int(i++);
         disp_str(".");
-        delay(1);
+        milli_delay(1000);
     }
 }

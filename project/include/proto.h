@@ -31,6 +31,14 @@ void testA(void);
 void testB(void);
 void testC(void);
 
+/* i8259.c */
+void set_irq_handler(int irq, irq_handler handler);
+void spurious_irq(int irq);
+
+/* clock.c */
+void clock_handler(int irq);
+void milli_delay(int milli_sec);
+
 /* proc.c */
 int sys_get_ticks(void);        /* sys_call */
 
