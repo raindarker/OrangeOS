@@ -10,7 +10,33 @@
 #include "proto.h"
 #include "proc.h"
 
-extern int g_ticks;
+extern int           g_ticks;
+extern process_t     process_table[NR_TASKS];
+extern process_t*    process_ready;
+
+/*======================================================================*
+  schedule
+  *======================================================================*/
+void schedule(void) {
+	process_t* p;
+	int	 greatest_ticks = 0;
+
+	while (!greatest_ticks) {
+		for (p = process_table; p < process_table + NR_TASKS; p++) {
+			if (p->ticks > greatest_ticks) {
+				greatest_ticks = p->ticks;
+				process_ready = p;
+			}
+		}
+
+		if (!greatest_ticks) {
+			for (p = process_table; p < process_table + NR_TASKS; p++) {
+				p->ticks = p->priority;
+			}
+		}
+	}
+}
+
 /*======================================================================*
   sys_get_ticks
   *======================================================================*/

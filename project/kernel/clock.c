@@ -14,18 +14,14 @@ extern int        g_re_enter;
 extern int        g_ticks;
 
 void clock_handler(int irq) {
-    disp_str("#");
     g_ticks++;
+    process_ready->ticks--;
 
     if (g_re_enter != 0) {
-        disp_str("!");
         return;
     }
 
-    process_ready++;
-    if (process_ready >= process_table + NR_TASKS) {
-        process_ready = process_table;
-    }
+    schedule();
 }
 
 

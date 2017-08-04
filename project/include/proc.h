@@ -36,6 +36,8 @@ typedef struct process {
 	stack_frame_t regs;           /* process registers saved in stack frame */
 	u16 ldt_sel;                  /* gdt selector giving ldt base and limit */
 	descriptor_t ldts[LDT_SIZE];  /* local descriptors for code and data */
+    int ticks;
+    int priority;
 	u32 pid;                      /* process id passed in from MM */
 	char p_name[32];              /* name of the process */
 } process_t;

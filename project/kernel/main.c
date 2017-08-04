@@ -51,6 +51,10 @@ int kernel_main(void) {
 		task++;
 		selector_ldt += 1 << 3;
     }
+    //set processes priority
+	process_table[0].ticks = process_table[0].priority = 150;
+	process_table[1].ticks = process_table[1].priority =  50;
+	process_table[2].ticks = process_table[2].priority =  30;
 
     g_re_enter = 0;
 
@@ -71,29 +75,23 @@ int kernel_main(void) {
 
 void testA() {
     while (1) {
-        disp_str("A");
-        disp_int(get_ticks());
-        disp_str(".");
-        milli_delay(1000);
+        disp_str("A.");
+        milli_delay(200);
     }
 }
 
 void testB() {
     int i = 0x1000;
     while (1) {
-        disp_str("B");
-        disp_int(i++);
-        disp_str(".");
-        milli_delay(1000);
+        disp_str("B.");
+        milli_delay(200);
     }
 }
 
 void testC() {
     int i = 0x2000;
     while (1) {
-        disp_str("C");
-        disp_int(i++);
-        disp_str(".");
-        milli_delay(1000);
+        disp_str("C.");
+        milli_delay(200);
     }
 }

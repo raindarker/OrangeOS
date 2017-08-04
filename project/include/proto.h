@@ -41,6 +41,7 @@ void milli_delay(int milli_sec);
 
 /* proc.c */
 int sys_get_ticks(void);        /* sys_call */
+void schedule(void);
 
 /* syscall.asm */
 void sys_call(void);             /* int_handler */
