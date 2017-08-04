@@ -16,6 +16,7 @@ extern process_t     process_table[NR_TASKS];
 extern process_t*    process_ready;
 extern char          task_stack[STACK_SIZE_TOTAL];
 extern int           g_re_enter;
+extern int           g_disp_pos;
 extern task_t        task_table[NR_TASKS];
 
 int kernel_main(void) {
@@ -52,9 +53,9 @@ int kernel_main(void) {
 		selector_ldt += 1 << 3;
     }
     //set processes priority
-	process_table[0].ticks = process_table[0].priority = 150;
-	process_table[1].ticks = process_table[1].priority =  50;
-	process_table[2].ticks = process_table[2].priority =  30;
+	process_table[0].ticks = process_table[0].priority = 15;
+	process_table[1].ticks = process_table[1].priority =  5;
+	process_table[2].ticks = process_table[2].priority =  3;
 
     g_re_enter = 0;
 
@@ -75,23 +76,23 @@ int kernel_main(void) {
 
 void testA() {
     while (1) {
-        disp_str("A.");
-        milli_delay(200);
+		disp_color_str("A.", BRIGHT | MAKE_COLOR(BLACK, RED));
+        milli_delay(10);
     }
 }
 
 void testB() {
     int i = 0x1000;
     while (1) {
-        disp_str("B.");
-        milli_delay(200);
+		disp_color_str("B.", BRIGHT | MAKE_COLOR(BLACK, GREEN));
+        milli_delay(10);
     }
 }
 
 void testC() {
     int i = 0x2000;
     while (1) {
-        disp_str("C.");
-        milli_delay(200);
+		disp_color_str("C.", BRIGHT | MAKE_COLOR(BLACK, BLUE));
+        milli_delay(10);
     }
 }

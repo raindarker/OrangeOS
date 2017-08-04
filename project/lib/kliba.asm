@@ -1,7 +1,7 @@
 %include "sconst.inc"
 
 ; 导入全局变量
-extern	disp_pos
+extern	g_disp_pos
 
 [SECTION .text]
 
@@ -21,7 +21,7 @@ disp_str:
 	mov	ebp, esp
 
 	mov	esi, [ebp + 8]	; pszInfo
-	mov	edi, [disp_pos]
+	mov	edi, [g_disp_pos]
 	mov	ah, 0Fh
 .1:
 	lodsb
@@ -46,7 +46,7 @@ disp_str:
 	jmp	.1
 
 .2:
-	mov	[disp_pos], edi
+	mov	[g_disp_pos], edi
 
 	pop	ebp
 	ret
@@ -59,7 +59,7 @@ disp_color_str:
 	mov	ebp, esp
 
 	mov	esi, [ebp + 8]	; pszInfo
-	mov	edi, [disp_pos]
+	mov	edi, [g_disp_pos]
 	mov	ah, [ebp + 12]	; color
 .1:
 	lodsb
@@ -84,7 +84,7 @@ disp_color_str:
 	jmp	.1
 
 .2:
-	mov	[disp_pos], edi
+	mov	[g_disp_pos], edi
 
 	pop	ebp
 	ret

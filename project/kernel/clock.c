@@ -21,9 +21,12 @@ void clock_handler(int irq) {
         return;
     }
 
+    if (process_ready->ticks > 0) {
+        return;
+    }
+
     schedule();
 }
-
 
 void milli_delay(int milli_sec) {
     int t = get_ticks();

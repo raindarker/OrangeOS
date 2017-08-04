@@ -4,7 +4,7 @@
 #include "protect.h"
 #include "proto.h"
 
-extern int          disp_pos;
+extern int          g_disp_pos;
 extern tss_t        tss;
 extern gate_t       idt[IDT_SIZE];
 extern descriptor_t gdt[GDT_SIZE];
@@ -183,12 +183,12 @@ void exception_handler(int vec_no,int err_code,int eip,int cs,int eflags) {
                         "#XF SIMD Floating-Point Exception"
     };
 
-    /* 通过打印空格的方式清空屏幕的前五行，并把 disp_pos 清零 */
-    disp_pos = 0;
+    /* 通过打印空格的方式清空屏幕的前五行，并把 g_disp_pos 清零 */
+    g_disp_pos = 0;
     for(i=0;i<80*5;i++) {
         disp_str(" ");
     }
-    disp_pos = 0;
+    g_disp_pos = 0;
 
     disp_color_str("Exception! --> ", text_color);
     disp_color_str(err_msg[vec_no], text_color);

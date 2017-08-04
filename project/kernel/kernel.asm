@@ -13,7 +13,7 @@ extern	gdt_ptr
 extern	idt_ptr
 extern  process_ready
 extern  tss
-extern	disp_pos
+extern	g_disp_pos
 extern	g_re_enter
 extern  g_irq_table
 extern  g_syscall_table
@@ -111,7 +111,7 @@ _start:
   ; 把 esp 从 LOADER 挪到 KERNEL
   mov   esp, StackTop	; 堆栈在 bss 段中
 
-  mov	dword [disp_pos], 0
+  mov	dword [g_disp_pos], 0
 
   sgdt	[gdt_ptr]
   call	cstart
