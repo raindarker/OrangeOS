@@ -14,6 +14,10 @@ void out_byte(u16 port, u8 value);
 u8 in_byte(u16 port);
 void disp_str(char * info);
 void disp_color_str(char * info, int color);
+void enable_irq(int irq);
+void disable_irq(int irq);
+void enable_interrupt(void);
+void disable_interrupt(void);
 
 /* protect.c */
 void init_prot();
@@ -38,6 +42,14 @@ void spurious_irq(int irq);
 /* clock.c */
 void clock_handler(int irq);
 void milli_delay(int milli_sec);
+void init_clock(void);
+
+/* keyboard.c */
+void init_keyboard(void);
+void keyboard_read(void);
+
+/* tty.c */
+void task_tty(void);
 
 /* proc.c */
 int sys_get_ticks(void);        /* sys_call */

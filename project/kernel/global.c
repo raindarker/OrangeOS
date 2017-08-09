@@ -19,6 +19,7 @@ process_t*    process_ready;
 process_t     process_table[NR_TASKS];
 char          task_stack[STACK_SIZE_TOTAL];
 task_t        task_table[NR_TASKS] = {
+    {task_tty, STACK_SIZE_TTY, "tty"},
     {testA, STACK_SIZE_TESTA, "testA"},
     {testB, STACK_SIZE_TESTB, "testB"},
     {testC, STACK_SIZE_TESTC, "testC"}

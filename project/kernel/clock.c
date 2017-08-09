@@ -5,6 +5,8 @@
  * Created Time: Mon 31 Jul 2017 07:27:25 PM CST
  */
 
+#include "types.h"
+#include "const.h"
 #include "proto.h"
 #include "proc.h"
 
@@ -31,4 +33,14 @@ void clock_handler(int irq) {
 void milli_delay(int milli_sec) {
     int t = get_ticks();
     while(((get_ticks() - t) * 1000 / HZ) < milli_sec) {}
+}
+
+void init_clock(void) {
+    /* 初始化 8253 PIT */
+    out_byte(TIMER_MODE, RATE_GENERATOR);
+    out_byte(TIMER0, (u8) (TIMER_FREQ/HZ) );
+    out_byte(TIMER0, (u8) ((TIMER_FREQ/HZ) >> 8));
+
+    set_irq_handler(CLOCK_IRQ, clock_handler);
+    enable_irq(CLOCK_IRQ);
 }
