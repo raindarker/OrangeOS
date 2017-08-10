@@ -37,6 +37,8 @@ void init_keyboard(void) {
 
 void keyboard_read(void) {
     u8 scan_code;
+    char output[2];
+    int make; /* 1: make; 0: break */
 
     if (kb_input_buffer.count > 0) {
         disable_interrupt();
@@ -48,6 +50,19 @@ void keyboard_read(void) {
         kb_input_buffer.count--;
         enable_interrupt();
 
-        disp_int(scan_code);
+        /* 下面开始解析扫描码 */
+        if (scan_code == 0xE1) {
+            /* 暂时不做任何操作 */
+        } else if (scan_code == 0xE0) {
+            /* 暂时不做任何操作 */
+        } else {	/* 下面处理可打印字符 */
+            /* 首先判断Make Code 还是 Break Code */
+            make = (scan_code & FLAG_BREAK ? 0 : 1);
+            /* 如果是Make Code 就打印，是 Break Code 则不做处理 */
+            if(make) {
+                output[0] = keymap[(scan_code & 0x7F) * MAP_COLS];
+                disp_str(output);
+            }
+        }
     }
 }
