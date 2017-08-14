@@ -50,6 +50,7 @@ void keyboard_read(void);
 
 /* tty.c */
 void task_tty(void);
+void in_process(u32 key);
 
 /* proc.c */
 int sys_get_ticks(void);        /* sys_call */
