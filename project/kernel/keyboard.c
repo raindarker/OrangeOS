@@ -68,7 +68,7 @@ static u8 get_byte_from_kbuf(void) {
     return scan_code;
 }
 
-void keyboard_read(void) {
+void keyboard_read(tty_t* tty) {
     u8 scan_code;
     char output[2];
     int make; /* 1: make; 0: break */
@@ -183,7 +183,7 @@ void keyboard_read(void) {
                 key |= alt_l	? FLAG_ALT_L	: 0;
                 key |= alt_r	? FLAG_ALT_R	: 0;
 
-                in_process(key);
+                in_process(tty, key);
             }
         }
     }

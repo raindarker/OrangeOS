@@ -8,6 +8,7 @@
 #ifndef __ORANGE_PROTO_H__
 #define __ORANGE_PROTO_H__
 #include "types.h"
+#include "tty.h"
 
 /* kliba.asm */
 void out_byte(u16 port, u8 value);
@@ -46,15 +47,19 @@ void init_clock(void);
 
 /* keyboard.c */
 void init_keyboard(void);
-void keyboard_read(void);
+void keyboard_read(tty_t* tty);
 
 /* tty.c */
 void task_tty(void);
-void in_process(u32 key);
+void in_process(tty_t* tty, u32 key);
 
 /* proc.c */
 int sys_get_ticks(void);        /* sys_call */
 void schedule(void);
+
+/* console.c */
+int is_current_console(console_t* console);
+void out_char(console_t* console, char c);
 
 /* syscall.asm */
 void sys_call(void);             /* int_handler */

@@ -24,7 +24,7 @@ DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 # This Program
 ORANGESBOOT	= boot/boot.bin boot/loader.bin
 ORANGESKERNEL = kernel.bin
-OBJS = kernel/kernel.o kernel/syscall.o kernel/keyboard.o kernel/tty.o kernel/start.o kernel/main.o kernel/proc.o kernel/clock.o kernel/i8259.o kernel/global.o kernel/protect.o lib/klib.o lib/kliba.o lib/string.o
+OBJS = kernel/kernel.o kernel/syscall.o kernel/keyboard.o kernel/console.o kernel/tty.o kernel/start.o kernel/main.o kernel/proc.o kernel/clock.o kernel/i8259.o kernel/global.o kernel/protect.o lib/klib.o lib/kliba.o lib/string.o
 DASMOUTPUT = kernel.bin.asm
 IMAGE:=OrangeOS.img
 
@@ -77,7 +77,12 @@ kernel/keyboard.o: kernel/keyboard.c include/types.h include/const.h \
 	@$(CC) $(CFLAGS) -o $@ $<
 
 kernel/tty.o: kernel/tty.c include/types.h include/const.h include/proto.h \
-	include/types.h
+	include/types.h include/tty.h include/console.h include/keyboard.h
+	@$(CC) $(CFLAGS) -o $@ $<
+
+kernel/console.o: kernel/console.c include/types.h include/const.h \
+	include/console.h include/proto.h include/types.h include/tty.h \
+	include/console.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
 kernel/start.o: kernel/start.c include/types.h include/const.h include/protect.h \

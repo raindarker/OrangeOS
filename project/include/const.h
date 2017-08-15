@@ -33,6 +33,9 @@
 #define	PRIVILEGE_TASK	1
 #define	PRIVILEGE_USER	3
 
+/* TTY */
+#define NR_CONSOLES	    3  /* consoles */
+
 /* 8259A interrupt controller ports. */
 #define INT_M_CTL     0x20 /* I/O port for interrupt controller       <Master> */
 #define INT_M_CTLMASK 0x21 /* setting bits in this port disables ints <Master> */
