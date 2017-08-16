@@ -25,6 +25,36 @@ static int num_lock;           /* Num Lock   */
 static int scroll_lock;        /* Scroll Lock    */
 static int column;
 
+static int caps_lock;          /* Caps Lock */
+static int num_lock;           /* Num Lock */
+static int scroll_lock;        /* Scroll Lock */
+
+static void kb_wait(void) {
+    u8 kb_stat;
+    do {
+        kb_stat = in_byte(KB_CMD);
+    } while (kb_stat & 0x02);
+}
+
+static void kb_ack(void) {
+    u8 kb_read;
+    do {
+        kb_read = in_byte(KB_DATA);
+    } while (kb_read != KB_ACK);
+}
+
+static void set_leds(void) {
+    u8 leds = (caps_lock << 2) | (num_lock << 1) | scroll_lock;
+
+    kb_wait();
+    out_byte(KB_DATA, LED_CODE);
+    kb_ack();
+
+    kb_wait();
+    out_byte(KB_DATA, leds);
+    kb_ack();
+}
+
 void keyboard_handler(int irq) {
     /* disp_str("*"); */
     u8 scan_code = in_byte(KB_DATA);
@@ -46,6 +76,12 @@ void init_keyboard(void) {
     shift_l = shift_r = 0;
     alt_l = alt_r = 0;
     ctrl_l = ctrl_r = 0;
+
+    caps_lock = 0;
+    num_lock = 1;
+    scroll_lock = 0;
+
+    set_leds();
 
     set_irq_handler(KEYBOARD_IRQ, keyboard_handler);
     enable_irq(KEYBOARD_IRQ);
