@@ -60,6 +60,8 @@ void schedule(void);
 /* console.c */
 int is_current_console(console_t* console);
 void out_char(console_t* console, char c);
+void init_screen(tty_t* tty);
+void select_console(int nr_console);
 
 /* syscall.asm */
 void sys_call(void);             /* int_handler */

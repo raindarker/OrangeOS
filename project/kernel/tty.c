@@ -22,8 +22,7 @@ static void init_tty(tty_t* tty) {
     tty->count = 0;
     tty->head = tty->tail = tty->buf;
 
-    int nr_tty = tty - g_tty_table;
-    tty->console = g_console_table + nr_tty;
+    init_screen(tty);
 }
 
 static void tty_do_read(tty_t* tty) {
@@ -53,14 +52,14 @@ void task_tty(void) {
     for (tty = TTY_FIRST; tty < TTY_END; tty++) {
         init_tty(tty);
     }
-    g_current_console = 0;
+
+    select_console(0);
 
     while(1) {
         for (tty = TTY_FIRST; tty < TTY_END; tty++) {
             tty_do_read(tty);
             tty_do_write(tty);
         }
-
     }
 }
 
@@ -93,6 +92,34 @@ void in_process(tty_t* tty, u32 key) {
             if ((key & FLAG_SHIFT_L) || (key & FLAG_SHIFT_R)) {
                 /* Shift+Down, do nothing */
             }
+            break;
+        case F1:
+        case F2:
+            break;
+        case F3:
+            if ((key & FLAG_ALT_L) || (key & FLAG_ALT_R)) {
+                select_console(0);
+            }
+            break;
+        case F4:
+        case F5:
+            break;
+        case F6:
+            if ((key & FLAG_ALT_L) || (key & FLAG_ALT_R)) {
+                select_console(1);
+            }
+            break;
+        case F7:
+        case F8:
+            break;
+        case F9:
+            if ((key & FLAG_ALT_L) || (key & FLAG_ALT_R)) {
+                select_console(2);
+            }
+            break;
+        case F10:
+        case F11:
+        case F12:
             break;
         default:
             break;
