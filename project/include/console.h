@@ -18,6 +18,12 @@ typedef struct console
 } console_t;
 
 
+#define SCR_UP          1   /* scroll forward */
+#define SCR_DN         -1   /* scroll backward */
+
+#define SCREEN_SIZE    (80 * 25)
+#define SCREEN_WIDTH   80
+
 #define DEFAULT_CHAR_COLOR 0x07         /* 0000 0111 黑底白字 */
 
 #endif /* __ORANGE_CONSOLE_H__ */

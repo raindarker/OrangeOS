@@ -80,17 +80,12 @@ void in_process(tty_t* tty, u32 key) {
         switch(raw_code) {
         case UP:
             if ((key & FLAG_SHIFT_L) || (key & FLAG_SHIFT_R)) {
-                disable_interrupt();
-                out_byte(CRTC_ADDR_REG, START_ADDR_H);
-                out_byte(CRTC_DATA_REG, ((80*15) >> 8) & 0xFF);
-                out_byte(CRTC_ADDR_REG, START_ADDR_L);
-                out_byte(CRTC_DATA_REG, (80*15) & 0xFF);
-                enable_interrupt();
+                scroll_screen(tty->console, SCR_DN);
             }
             break;
         case DOWN:
             if ((key & FLAG_SHIFT_L) || (key & FLAG_SHIFT_R)) {
-                /* Shift+Down, do nothing */
+                scroll_screen(tty->console, SCR_UP);
             }
             break;
         case F1:

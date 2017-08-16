@@ -77,6 +77,24 @@ void select_console(int nr_console) {
     }
 
     g_current_console = nr_console;
-    set_cursor(g_console_table[nr_console].cursor);
+
     set_video_start_addr(g_console_table[nr_console].current_start_addr);
+    set_cursor(g_console_table[nr_console].cursor);
+}
+
+void scroll_screen(console_t* console, int direction) {
+	if (direction == SCR_UP) {
+		if (console->current_start_addr > console->original_addr) {
+			console->current_start_addr -= SCREEN_WIDTH;
+		}
+	} else if (direction == SCR_DN) {
+		if (console->current_start_addr + SCREEN_SIZE <
+		    console->original_addr + console->v_mem_limit) {
+			console->current_start_addr += SCREEN_WIDTH;
+		}
+	} else{
+	}
+
+	set_video_start_addr(console->current_start_addr);
+	set_cursor(console->cursor);
 }
