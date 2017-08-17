@@ -19,14 +19,19 @@ int           g_current_console;
 tss_t         tss;
 process_t*    process_ready;
 
-process_t     process_table[NR_TASKS];
-char          task_stack[STACK_SIZE_TOTAL];
+process_t     process_table[NR_TASKS + NR_PROCS];
+
 task_t        task_table[NR_TASKS] = {
     {task_tty, STACK_SIZE_TTY, "tty"},
+};
+
+task_t        user_proc_table[NR_PROCS] = {
     {testA, STACK_SIZE_TESTA, "testA"},
     {testB, STACK_SIZE_TESTB, "testB"},
     {testC, STACK_SIZE_TESTC, "testC"}
 };
+
+char          task_stack[STACK_SIZE_TOTAL];
 
 tty_t         g_tty_table[NR_CONSOLES];
 console_t     g_console_table[NR_CONSOLES];

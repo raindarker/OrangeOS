@@ -22,7 +22,7 @@ void schedule(void) {
 	int	 greatest_ticks = 0;
 
 	while (!greatest_ticks) {
-		for (p = process_table; p < process_table + NR_TASKS; p++) {
+		for (p = process_table; p < process_table + NR_TASKS + NR_PROCS; p++) {
 			if (p->ticks > greatest_ticks) {
 				greatest_ticks = p->ticks;
 				process_ready = p;
@@ -30,7 +30,7 @@ void schedule(void) {
 		}
 
 		if (!greatest_ticks) {
-			for (p = process_table; p < process_table + NR_TASKS; p++) {
+			for (p = process_table; p < process_table + NR_TASKS + NR_PROCS; p++) {
 				p->ticks = p->priority;
 			}
 		}

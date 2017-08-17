@@ -142,7 +142,7 @@ void init_prot() {
     tss.iobase = sizeof(tss); /* 没有I/O许可位图 */
 
     /* 填充 GDT 中进程的 LDT 的描述符 */
-    for (i = 0; i < NR_TASKS; i++) {
+    for (i = 0; i < NR_TASKS + NR_PROCS; i++) {
         init_descriptor(&gdt[selector_ldt >> 3],
                         vir2phys(seg2phys(SELECTOR_KERNEL_DS), process_table[i].ldts),
                         LDT_SIZE * sizeof(descriptor_t) - 1,
