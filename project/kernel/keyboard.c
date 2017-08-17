@@ -168,13 +168,20 @@ void keyboard_read(tty_t* tty) {
             key_row = &keymap[(scan_code & 0x7F) * MAP_COLS];
 
             column = 0;
-            if (shift_l || shift_r) {
-                column = 1;
-            }
+
+			int caps = shift_l || shift_r;
+
+			if (caps_lock) {
+				if ((key_row[0] >= 'a') && (key_row[0] <= 'z')){
+					caps = !caps;
+				}
+			}
+			if (caps) {
+				column = 1;
+			}
 
             if (code_with_E0) {
                 column = 2;
-                code_with_E0 = 0;
             }
 
             key = key_row[column];
@@ -204,6 +211,24 @@ void keyboard_read(tty_t* tty) {
                 alt_l = make;
                 key = 0;
                 break;
+            case CAPS_LOCK:
+                if (make) {
+                    caps_lock = !caps_lock;
+                    set_leds();
+                }
+                break;
+            case NUM_LOCK:
+                if (make) {
+                    num_lock = !num_lock;
+                    set_leds();
+                }
+                break;
+            case SCROLL_LOCK:
+                if (make) {
+                    scroll_lock = !scroll_lock;
+                    set_leds();
+                }
+                break;
             default:
                 if (!make) {	/* 如果是 Break Code */
                     key = 0;	/* 忽略之 */
@@ -212,12 +237,82 @@ void keyboard_read(tty_t* tty) {
             }
 
             if (make) { /* 忽略 Break Code */
+                int pad = 0;
+
+                /* 首先处理小键盘 */
+                if ((key >= PAD_SLASH) && (key <= PAD_9)) {
+                    pad = 1;
+                    switch(key) {
+                    case PAD_SLASH:
+                        key = '/';
+                        break;
+                    case PAD_STAR:
+                        key = '*';
+                        break;
+                    case PAD_MINUS:
+                        key = '-';
+                        break;
+                    case PAD_PLUS:
+                        key = '+';
+                        break;
+                    case PAD_ENTER:
+                        key = ENTER;
+                        break;
+                    default:
+                        if (num_lock &&
+                            (key >= PAD_0) &&
+                            (key <= PAD_9)) {
+                            key = key - PAD_0 + '0';
+                        } else if (num_lock &&
+                                 (key == PAD_DOT)) {
+                            key = '.';
+                        } else {
+                            switch(key) {
+                            case PAD_HOME:
+                                key = HOME;
+                                break;
+                            case PAD_END:
+                                key = END;
+                                break;
+                            case PAD_PAGEUP:
+                                key = PAGEUP;
+                                break;
+                            case PAD_PAGEDOWN:
+                                key = PAGEDOWN;
+                                break;
+                            case PAD_INS:
+                                key = INSERT;
+                                break;
+                            case PAD_UP:
+                                key = UP;
+                                break;
+                            case PAD_DOWN:
+                                key = DOWN;
+                                break;
+                            case PAD_LEFT:
+                                key = LEFT;
+                                break;
+                            case PAD_RIGHT:
+                                key = RIGHT;
+                                break;
+                            case PAD_DOT:
+                                key = DELETE;
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+
                 key |= shift_l	? FLAG_SHIFT_L	: 0;
                 key |= shift_r	? FLAG_SHIFT_R	: 0;
                 key |= ctrl_l	? FLAG_CTRL_L	: 0;
                 key |= ctrl_r	? FLAG_CTRL_R	: 0;
                 key |= alt_l	? FLAG_ALT_L	: 0;
                 key |= alt_r	? FLAG_ALT_R	: 0;
+                key |= pad      ? FLAG_PAD      : 0;
 
                 in_process(tty, key);
             }
