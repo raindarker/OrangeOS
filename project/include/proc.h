@@ -39,7 +39,8 @@ typedef struct process {
     int ticks;
     int priority;
 	u32 pid;                      /* process id passed in from MM */
-	char p_name[32];              /* name of the process */
+	char name[32];              /* name of the process */
+    int tty;
 } process_t;
 
 typedef struct task {

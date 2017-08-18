@@ -138,3 +138,18 @@ void in_process(tty_t* tty, u32 key) {
         }
     }
 }
+
+void tty_write(tty_t* tty, char* buf, int len) {
+    char* c = buf;
+    int i = len;
+
+    while (i) {
+        out_char(tty->console, *c++);
+        i--;
+    }
+}
+
+int sys_write(char* buf, int len, process_t* process) {
+    tty_write(&g_tty_table[process->tty], buf, len);
+    return 0;
+}

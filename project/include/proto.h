@@ -9,6 +9,7 @@
 #define __ORANGE_PROTO_H__
 #include "types.h"
 #include "tty.h"
+#include "proc.h"
 
 /* kliba.asm */
 void out_byte(u16 port, u8 value);
@@ -64,8 +65,25 @@ void init_screen(tty_t* tty);
 void select_console(int nr_console);
 void scroll_screen(console_t* console, int direction);
 
+/* printf.c */
+int printf(const char* fmt, ...);
+
+/* vsprintf.c */
+int vsprintf(char* buf, const char* fmt, va_list args);
+
+/* syscall */
+
+/* system */
+/* proc.c */
+int  sys_get_ticks(void);
+int  sys_write(char* buf, int len, process_t* process);
 /* syscall.asm */
 void sys_call(void);             /* int_handler */
-int get_ticks(void);
+
+/* userland */
+int  get_ticks(void);
+void write(char* buf, int len);
+
+
 
 #endif /* __ORANGE_PROTO_H__ */

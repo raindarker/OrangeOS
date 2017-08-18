@@ -44,7 +44,7 @@ int kernel_main(void) {
             eflags      = 0x202; /* IF=1, bit 2 is always 1 */
         }
 
-        strcpy(process->p_name, task->name);	// name of the process
+        strcpy(process->name, task->name);	// name of the process
         process->pid = i;			// pid
         process->ldt_sel = selector_ldt;
 
@@ -63,6 +63,8 @@ int kernel_main(void) {
         process->regs.esp = (u32)task_stack_top;
         process->regs.eflags = eflags;
 
+        process->tty = 0;
+
         task_stack_top -= task->stack_size;
         process++;
         task++;
@@ -71,7 +73,12 @@ int kernel_main(void) {
     //set processes priority
     process_table[0].ticks = process_table[0].priority = 15;
     process_table[1].ticks = process_table[1].priority =  5;
-    process_table[2].ticks = process_table[2].priority =  3;
+    process_table[2].ticks = process_table[2].priority =  5;
+    process_table[3].ticks = process_table[2].priority =  5;
+
+    process_table[1].tty   = 0;
+    process_table[2].tty   = 1;
+    process_table[3].tty   = 2;
 
     g_re_enter = 0;
 
@@ -89,6 +96,7 @@ int kernel_main(void) {
 void testA() {
     while (1) {
         /* disp_color_str("A.", BRIGHT | MAKE_COLOR(BLACK, RED)); */
+		printf("<Ticks:%x>", get_ticks());
         milli_delay(10);
     }
 }
@@ -97,6 +105,7 @@ void testB() {
     int i = 0x1000;
     while (1) {
         /* disp_color_str("B.", BRIGHT | MAKE_COLOR(BLACK, GREEN)); */
+		printf("B");
         milli_delay(10);
     }
 }
@@ -105,6 +114,7 @@ void testC() {
     int i = 0x2000;
     while (1) {
         /* disp_color_str("C.", BRIGHT | MAKE_COLOR(BLACK, BLUE)); */
+		printf("C");
         milli_delay(10);
     }
 }

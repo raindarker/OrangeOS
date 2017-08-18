@@ -39,5 +39,6 @@ console_t     g_console_table[NR_CONSOLES];
 irq_handler   g_irq_table[NR_IRQ];
 
 system_call   g_syscall_table[NR_SYS_CALL] = {
-    sys_get_ticks
+    sys_get_ticks,
+    sys_write
 };
