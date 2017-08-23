@@ -8,7 +8,6 @@
 #ifndef __ORANGE_PROTO_H__
 #define __ORANGE_PROTO_H__
 #include "types.h"
-#include "tty.h"
 #include "proc.h"
 
 /* kliba.asm */
@@ -27,7 +26,9 @@ void init_8259A();
 u32	seg2phys(u16 seg);
 
 /* klib.c */
-void delay(int time);
+void  delay(int time);
+void  disp_int(int input);
+char* itoa(char * str, int num);
 
 /* kernel.asm */
 void restart(void);
@@ -36,53 +37,32 @@ void restart(void);
 void testA(void);
 void testB(void);
 void testC(void);
+void panic(const char* fmt, ...);
 
 /* i8259.c */
+void init_8259A();
 void set_irq_handler(int irq, irq_handler handler);
 void spurious_irq(int irq);
 
-/* clock.c */
-void clock_handler(int irq);
-void milli_delay(int milli_sec);
-void init_clock(void);
-
-/* keyboard.c */
-void init_keyboard(void);
-void keyboard_read(tty_t* tty);
-
-/* tty.c */
-void task_tty(void);
-void in_process(tty_t* tty, u32 key);
-
-/* proc.c */
-int sys_get_ticks(void);        /* sys_call */
-void schedule(void);
-
-/* console.c */
-int is_current_console(console_t* console);
-void out_char(console_t* console, char c);
-void init_screen(tty_t* tty);
-void select_console(int nr_console);
-void scroll_screen(console_t* console, int direction);
+/* systask.c */
+void task_sys();
 
 /* printf.c */
 int printf(const char* fmt, ...);
+#define printl printf
+int sprintf(char* buf, const char* fmt, ...);
 
 /* vsprintf.c */
 int vsprintf(char* buf, const char* fmt, va_list args);
 
 /* syscall */
 
-/* system */
-/* proc.c */
-int  sys_get_ticks(void);
-int  sys_write(char* buf, int len, process_t* process);
 /* syscall.asm */
 void sys_call(void);             /* int_handler */
 
 /* userland */
-int  get_ticks(void);
-void write(char* buf, int len);
+int  sendrecv(int function, int src_dest, message_t* msg);
+void printx(char* buf);
 
 
 

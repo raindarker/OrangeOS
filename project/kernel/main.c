@@ -5,11 +5,13 @@
  * Created Time: Wed 26 Jul 2017 07:41:04 PM CST
  */
 
-#include "proto.h"
 #include "proc.h"
 #include "protect.h"
 #include "const.h"
 #include "string.h"
+#include "tty.h"
+#include "proto.h"
+#include "clock.h"
 
 extern descriptor_t  gdt[GDT_SIZE];
 extern process_t     process_table[NR_TASKS];
@@ -27,6 +29,7 @@ int kernel_main(void) {
     char* task_stack_top = task_stack + STACK_SIZE_TOTAL;
     u16 selector_ldt = SELECTOR_LDT_FIRST;
     int i;
+    int prio;
     u8  privilege;
     u8  rpl;
     int eflags;
@@ -37,11 +40,13 @@ int kernel_main(void) {
             privilege   = PRIVILEGE_TASK;
             rpl         = RPL_TASK;
             eflags      = 0x1202; /* IF=1, IOPL=1, bit 2 is always 1 */
+            prio        = 15;
         } else {            /* 用户进程 */
             task        = user_proc_table + (i - NR_TASKS);
             privilege   = PRIVILEGE_USER;
             rpl         = RPL_USER;
             eflags      = 0x202; /* IF=1, bit 2 is always 1 */
+            prio        = 5;
         }
 
         strcpy(process->name, task->name);	// name of the process
@@ -65,20 +70,25 @@ int kernel_main(void) {
 
         process->tty = 0;
 
+		process->flags = 0;
+		process->msg = 0;
+		process->recvfrom = NO_TASK;
+		process->sendto = NO_TASK;
+		process->has_interrupt_msg = 0;
+		process->sending_queue = 0;
+		process->next_sending = 0;
+
+		process->ticks = process->priority = prio;
+
         task_stack_top -= task->stack_size;
         process++;
         task++;
         selector_ldt += 1 << 3;
     }
-    //set processes priority
-    process_table[0].ticks = process_table[0].priority = 15;
-    process_table[1].ticks = process_table[1].priority =  5;
-    process_table[2].ticks = process_table[2].priority =  5;
-    process_table[3].ticks = process_table[2].priority =  5;
 
-    process_table[1].tty   = 0;
-    process_table[2].tty   = 1;
-    process_table[3].tty   = 2;
+    process_table[NR_TASKS + 1].tty   = 0;
+    process_table[NR_TASKS + 2].tty   = 1;
+    process_table[NR_TASKS + 3].tty   = 1;
 
     g_re_enter = 0;
 
@@ -96,7 +106,7 @@ int kernel_main(void) {
 void testA() {
     while (1) {
         /* disp_color_str("A.", BRIGHT | MAKE_COLOR(BLACK, RED)); */
-		printf("<Ticks:%x>", get_ticks());
+        printf("<Ticks:%x>", get_ticks());
         milli_delay(10);
     }
 }
@@ -105,7 +115,7 @@ void testB() {
     int i = 0x1000;
     while (1) {
         /* disp_color_str("B.", BRIGHT | MAKE_COLOR(BLACK, GREEN)); */
-		printf("B");
+        printf("B");
         milli_delay(10);
     }
 }
@@ -114,7 +124,20 @@ void testC() {
     int i = 0x2000;
     while (1) {
         /* disp_color_str("C.", BRIGHT | MAKE_COLOR(BLACK, BLUE)); */
-		printf("C");
+        printf("C");
         milli_delay(10);
     }
+}
+
+void panic(const char* fmt, ...) {
+	int i;
+	char buf[256] = {'\0'};
+
+	va_list arg = (va_list)((char*)&fmt + 4);
+	i = vsprintf(buf, fmt, arg);
+
+	printl("%c !!panic!! %s", MAG_CH_PANIC, buf);
+
+	/* should never arrive here */
+	__asm__ __volatile__("ud2");
 }

@@ -7,6 +7,7 @@
 
 #include "types.h"
 #include "const.h"
+#include "tty.h"
 #include "console.h"
 #include "proto.h"
 

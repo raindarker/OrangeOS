@@ -30,6 +30,14 @@ void clock_handler(int irq) {
     schedule();
 }
 
+int get_ticks(void) {
+    message_t msg;
+    reset_msg(&msg);
+    msg.type = GET_TICKS;
+    send_recv(BOTH, TASK_SYS, &msg);
+    return msg.RETVAL;
+}
+
 void milli_delay(int milli_sec) {
     int t = get_ticks();
     while(((get_ticks() - t) * 1000 / HZ) < milli_sec) {}

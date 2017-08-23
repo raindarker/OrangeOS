@@ -15,7 +15,7 @@ ASM		= nasm
 DASM	= ndisasm
 CC		= gcc
 LD		= ld
-ASMBFLAGS	= -I boot/include/
+ASMBFLAGS	= -I ./ -I boot/include/
 ASMKFLAGS	= -I include/ -f elf
 CFLAGS		= -m32 -I include/ -c -fno-builtin -fno-stack-protector
 LDFLAGS		= -melf_i386 -s -Ttext $(ENTRYPOINT)
@@ -24,7 +24,11 @@ DASMFLAGS	= -u -o $(ENTRYPOINT) -e $(ENTRYOFFSET)
 # This Program
 ORANGESBOOT	= boot/boot.bin boot/loader.bin
 ORANGESKERNEL = kernel.bin
-OBJS = kernel/kernel.o kernel/syscall.o kernel/keyboard.o kernel/console.o kernel/tty.o kernel/start.o kernel/main.o kernel/proc.o kernel/clock.o kernel/printf.o kernel/vsprintf.o kernel/i8259.o kernel/global.o kernel/protect.o lib/klib.o lib/kliba.o lib/string.o
+OBJS = kernel/kernel.o kernel/syscall.o kernel/keyboard.o \
+       kernel/console.o kernel/tty.o kernel/start.o kernel/main.o \
+       kernel/proc.o kernel/clock.o kernel/printf.o kernel/vsprintf.o \
+       kernel/i8259.o kernel/global.o kernel/protect.o kernel/systask.o \
+       lib/klib.o lib/misc.o lib/kliba.o lib/string.o
 DASMOUTPUT = kernel.bin.asm
 IMAGE:=OrangeOS.img
 
@@ -115,8 +119,14 @@ kernel/protect.o: kernel/protect.c include/types.h include/const.h include/proc.
 	include/const.h include/protect.h include/types.h include/protect.h include/proto.h
 	@$(CC) $(CFLAGS) -o $@ $<
 
+kernel/systask.o: kernel/systask.c
+	@$(CC) $(CFLAGS) -o $@ $<
+
 lib/klib.o: lib/klib.c include/types.h include/const.h include/protect.h include/types.h \
 	include/proto.h include/string.h
+	@$(CC) $(CFLAGS) -o $@ $<
+
+lib/misc.o: lib/misc.c
 	@$(CC) $(CFLAGS) -o $@ $<
 
 lib/kliba.o : lib/kliba.asm

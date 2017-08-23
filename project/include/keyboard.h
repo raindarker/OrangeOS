@@ -8,6 +8,8 @@
 #ifndef __ORANGE_KEYBOARD_H__
 #define __ORANGE_KEYBOARD_H__
 
+typedef struct tty tty_t;
+
 /************************************************************************/
 /*                          Macros Declaration                          */
 /************************************************************************/
@@ -125,5 +127,8 @@ typedef struct kb_input {
     int count;                /* 缓冲区中共有多少字节 */
     char buf[KB_IN_BYTES];    /* 缓冲区 */
 } kb_input_t;
+
+void init_keyboard(void);
+void keyboard_read(tty_t* tty);
 
 #endif /* __ORANGE_KEYBOARD_H__ */
