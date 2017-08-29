@@ -28,7 +28,9 @@ OBJS = kernel/kernel.o kernel/syscall.o kernel/keyboard.o \
        kernel/console.o kernel/tty.o kernel/start.o kernel/main.o \
        kernel/proc.o kernel/clock.o kernel/printf.o kernel/vsprintf.o \
        kernel/i8259.o kernel/global.o kernel/protect.o kernel/systask.o \
-       lib/klib.o lib/misc.o lib/kliba.o lib/string.o
+       kernel/hd.o \
+       lib/klib.o lib/misc.o lib/kliba.o lib/string.o \
+	   fs/main.o
 DASMOUTPUT = kernel.bin.asm
 IMAGE:=OrangeOS.img
 
@@ -122,6 +124,11 @@ kernel/protect.o: kernel/protect.c include/types.h include/const.h include/proc.
 kernel/systask.o: kernel/systask.c
 	@$(CC) $(CFLAGS) -o $@ $<
 
+kernel/hd.o: kernel/hd.c include/hd.h include/types.h include/proc.h \
+	include/const.h include/protect.h include/proto.h include/proc.h \
+	include/const.h include/types.h
+	@$(CC) $(CFLAGS) -o $@ $<
+
 lib/klib.o: lib/klib.c include/types.h include/const.h include/protect.h include/types.h \
 	include/proto.h include/string.h
 	@$(CC) $(CFLAGS) -o $@ $<
@@ -134,3 +141,7 @@ lib/kliba.o : lib/kliba.asm
 
 lib/string.o : lib/string.asm
 	@$(ASM) $(ASMKFLAGS) -o $@ $<
+
+fs/main.o: fs/main.c include/proto.h include/types.h include/proc.h \
+	include/const.h include/protect.h include/hd.h include/types.h
+	@$(CC) $(CFLAGS) -o $@ $<

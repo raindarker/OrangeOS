@@ -188,11 +188,11 @@ static int msg_send(process_t* current, int dst, message_t* msg) {
 
 static int msg_receive(process_t* current, int src, message_t* msg) {
     process_t* who_wanna_recv = current; /**
-                                                 * This name is a little bit
-                                                 * wierd, but it makes me
-                                                 * think clearly, so I keep
-                                                 * it.
-                                                 */
+                                          * This name is a little bit
+                                          * wierd, but it makes me
+                                          * think clearly, so I keep
+                                          * it.
+                                          */
     process_t* from = 0; /* from which the message will be fetched */
     process_t* prev = 0;
     int copy_ok = 0;
@@ -366,4 +366,28 @@ int sys_sendrecv(int function, int src_dest, message_t* msg, process_t* p) {
     }
 
     return 0;
+}
+
+void inform_interrupt(int task) {
+    process_t* p = process_table + task;
+
+    if ((p->flags & RECEIVING) && /* dest is waiting for the msg */
+        ((p->recvfrom == INTERRUPT) || (p->recvfrom == ANY))) {
+        p->msg->source = INTERRUPT;
+        p->msg->type = HARD_INT;
+        p->msg = 0;
+        p->has_interrupt_msg = 0;
+        p->flags &= ~RECEIVING; /* dest has received the msg */
+        p->recvfrom = NO_TASK;
+
+        assert(p->flags == 0);
+        unblock(p);
+
+        assert(p->flags == 0);
+        assert(p->msg == 0);
+        assert(p->recvfrom == NO_TASK);
+        assert(p->sendto == NO_TASK);
+    } else {
+        p->has_interrupt_msg = 1;
+    }
 }

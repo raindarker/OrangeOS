@@ -106,7 +106,7 @@ int kernel_main(void) {
 void testA() {
     while (1) {
         /* disp_color_str("A.", BRIGHT | MAKE_COLOR(BLACK, RED)); */
-        printf("<Ticks:%x>", get_ticks());
+        /* printf("<Ticks:%x>", get_ticks()); */
         milli_delay(10);
     }
 }
@@ -115,7 +115,7 @@ void testB() {
     int i = 0x1000;
     while (1) {
         /* disp_color_str("B.", BRIGHT | MAKE_COLOR(BLACK, GREEN)); */
-        printf("B");
+        /* printf("B"); */
         milli_delay(10);
     }
 }
@@ -124,7 +124,7 @@ void testC() {
     int i = 0x2000;
     while (1) {
         /* disp_color_str("C.", BRIGHT | MAKE_COLOR(BLACK, BLUE)); */
-        printf("C");
+        /* printf("C"); */
         milli_delay(10);
     }
 }

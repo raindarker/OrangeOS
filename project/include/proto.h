@@ -19,6 +19,7 @@ void enable_irq(int irq);
 void disable_irq(int irq);
 void enable_interrupt(void);
 void disable_interrupt(void);
+void port_read(u16 port, void* buf, int n);
 
 /* protect.c */
 void init_prot();

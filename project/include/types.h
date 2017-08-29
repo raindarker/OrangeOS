@@ -72,6 +72,13 @@ enum msgtype {
 
     /* SYS task */
     GET_TICKS,
+
+	/* message type for drivers */
+	DEV_OPEN = 1001,
+	DEV_CLOSE,
+	DEV_READ,
+	DEV_WRITE,
+	DEV_IOCTL
 };
 
 #define	RETVAL		u.m3.m3i1

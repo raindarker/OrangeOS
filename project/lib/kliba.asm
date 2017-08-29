@@ -14,6 +14,7 @@ global  enable_irq
 global  disable_irq
 global  enable_interrupt
 global  disable_interrupt
+global	port_read
 
   ; ========================================================================
   ;                  void disp_str(char * pszInfo);
@@ -185,15 +186,27 @@ enable_8:
   ret
 
   ; ========================================================================
-  ;        void disable_interrupt();
+  ; void disable_interrupt();
   ; ========================================================================
 disable_interrupt:
   cli
   ret
 
   ; ========================================================================
-  ;        void enable_interrupt();
+  ; void enable_interrupt();
   ; ========================================================================
 enable_interrupt:
   sti
+  ret
+
+  ; ========================================================================
+  ; void port_read(u16 port, void* buf, int n);
+  ; ========================================================================
+port_read:
+  mov	edx, [esp + 4]		; port
+  mov	edi, [esp + 4 + 4]	; buf
+  mov	ecx, [esp + 4 + 4 + 4]	; n
+  shr	ecx, 1
+  cld
+  rep	insw
   ret

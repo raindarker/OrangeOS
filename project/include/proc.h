@@ -65,7 +65,7 @@ typedef struct task {
 #define proc2pid(x) (x - process_table)
 
 /* Number of tasks & procs */
-#define NR_TASKS	2
+#define NR_TASKS	4
 #define NR_PROCS    3
 
 #define FIRST_PROCESS       process_table[0]
@@ -74,11 +74,15 @@ typedef struct task {
 /* stacks of tasks */
 #define STACK_SIZE_TTY      0x8000
 #define STACK_SIZE_SYS      0x8000
+#define STACK_SIZE_HD       0x8000
+#define STACK_SIZE_FS       0x8000
 #define STACK_SIZE_TESTA	0x8000
 #define STACK_SIZE_TESTB    0x8000
 #define STACK_SIZE_TESTC    0x8000
 #define STACK_SIZE_TOTAL    (STACK_SIZE_TTY +   \
                              STACK_SIZE_SYS +   \
+                             STACK_SIZE_HD +    \
+                             STACK_SIZE_FS +    \
                              STACK_SIZE_TESTA + \
                              STACK_SIZE_TESTB + \
                              STACK_SIZE_TESTC)
@@ -89,7 +93,7 @@ typedef struct task {
 #define INTERRUPT       -10
 #define TASK_TTY        0
 #define TASK_SYS        1
-/* #define TASK_WINCH 2 */
+#define TASK_HD         2
 /* #define TASK_FS 3 */
 /* #define TASK_MM 4 */
 #define ANY            (NR_TASKS + NR_PROCS + 10)
@@ -110,8 +114,9 @@ void  schedule();
 void* va2la(int pid, void* va);
 int   ldt_seg_linear(process_t* p, int idx);
 void  reset_msg(message_t* msg);
-void  dump_msg(const char * title, message_t* msg);
-void  dump_process(process_t * p);
-int	  send_recv(int function, int src_dest, message_t* msg);
+void  dump_msg(const char* title, message_t* msg);
+void  dump_process(process_t* p);
+int   send_recv(int function, int src_dest, message_t* msg);
+void  inform_interrupt(int task);
 
 #endif /* __ORANGE_PROC_H__ */
